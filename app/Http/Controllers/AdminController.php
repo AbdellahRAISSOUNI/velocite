@@ -1,4 +1,4 @@
-e no <?php
+<?php
 
 namespace App\Http\Controllers;
 
