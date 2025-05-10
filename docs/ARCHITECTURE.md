@@ -106,6 +106,16 @@ The service layer contains business logic that would otherwise complicate contro
 - `RatingService`: Processes user and bike ratings
 - `PaymentService`: Handles payment processing for rentals and premium listings
 
+### Agent Communication System
+
+The agent communication system provides tools for support agents to facilitate communication between clients and partners:
+
+- `AgentController`: Manages agent communication and moderation features
+- `RentalComment` Model: Extended with moderation capabilities
+- `RentalEvaluation` Model: Manages structured feedback collection
+- Comment moderation workflow: Approve, edit, or reject user comments
+- Visibility controls: Agents can direct messages to specific parties
+
 ### Frontend Architecture
 
 The frontend uses Blade templates with Tailwind CSS for styling. Key aspects include:
@@ -208,6 +218,13 @@ class RentalObserver
    - Admin monitors platform activity
    - Admin manages user accounts and resolves disputes
    - Admin reviews and moderates content
+
+4. **Agent Communication Flow**:
+   - Agent reviews rentals requiring intervention
+   - Agent facilitates communication between clients and partners
+   - Agent sends evaluation forms for dispute resolution
+   - Agent moderates comments for quality control
+   - Agent monitors and resolves issues during the rental lifecycle
 
 ## Security Considerations
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Bike;
 use App\Models\Rental;
 use App\Models\User;
+use App\Models\RentalComment;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -30,6 +31,7 @@ class AgentDashboardController extends Controller
         $bikeQuery = Bike::query()->with(['owner', 'category']);
         $userQuery = User::where('id', '!=', $user->id)->with('profile');
         $rentalQuery = Rental::with(['bike', 'renter', 'bike.owner']);
+        $commentQuery = RentalComment::where('is_moderated', false);
 
         if ($city) {
             $bikeQuery->whereHas('owner.profile', function ($query) use ($city) {
@@ -43,6 +45,10 @@ class AgentDashboardController extends Controller
             $rentalQuery->whereHas('bike.owner.profile', function ($query) use ($city) {
                 $query->where('city', $city);
             });
+
+            $commentQuery->whereHas('rental.bike.owner.profile', function ($query) use ($city) {
+                $query->where('city', $city);
+            });
         }
 
         $bikes = $bikeQuery->latest()->take(10)->get();
@@ -53,6 +59,7 @@ class AgentDashboardController extends Controller
         $totalBikes = $bikeQuery->count();
         $totalUsers = $userQuery->count();
         $totalRentals = $rentalQuery->count();
+        $pendingComments = $commentQuery->count();
 
         return view('dashboard.agent', [
             'user' => $user,
@@ -63,6 +70,7 @@ class AgentDashboardController extends Controller
             'totalBikes' => $totalBikes,
             'totalUsers' => $totalUsers,
             'totalRentals' => $totalRentals,
+            'pendingComments' => $pendingComments,
         ]);
     }
 }

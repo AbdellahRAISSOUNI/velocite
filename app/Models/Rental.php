@@ -87,6 +87,14 @@ class Rental extends Model
     }
 
     /**
+     * Get the evaluation forms associated with this rental.
+     */
+    public function evaluations(): HasMany
+    {
+        return $this->hasMany(RentalEvaluation::class);
+    }
+
+    /**
      * Get the comments for this rental.
      */
     public function comments(): HasMany

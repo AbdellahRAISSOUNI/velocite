@@ -18,7 +18,7 @@
                     </div>
 
                     <!-- Quick Stats -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                         <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
                             <h3 class="text-sm font-medium text-blue-800 mb-2">Total Users</h3>
                             <p class="text-3xl font-bold text-blue-600">{{ $totalUsers }}</p>
@@ -30,6 +30,10 @@
                         <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
                             <h3 class="text-sm font-medium text-purple-800 mb-2">Total Rentals</h3>
                             <p class="text-3xl font-bold text-purple-600">{{ $totalRentals }}</p>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                            <h3 class="text-sm font-medium text-yellow-800 mb-2">Pending Comments</h3>
+                            <p class="text-3xl font-bold text-yellow-600">{{ $pendingComments }}</p>
                         </div>
                     </div>
 
@@ -163,16 +167,16 @@
                         </div>
                         <div class="bg-gray-50 p-6 rounded-lg">
                             <h3 class="text-lg font-medium mb-3">Rental Management</h3>
-                            <p class="text-gray-600 mb-4">Handle issues, approve cancellations, and manage disputes.</p>
-                            <a href="#" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            <p class="text-gray-600 mb-4">Handle issues, manage communications, and resolve disputes.</p>
+                            <a href="{{ route('agent.rentals') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                                 Manage Rentals
                             </a>
                         </div>
                         <div class="bg-gray-50 p-6 rounded-lg">
-                            <h3 class="text-lg font-medium mb-3">Support Tickets</h3>
-                            <p class="text-gray-600 mb-4">View and respond to support tickets from users.</p>
-                            <a href="#" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                View Tickets
+                            <h3 class="text-lg font-medium mb-3">Comment Moderation</h3>
+                            <p class="text-gray-600 mb-4">Review and moderate comments between renters and bike owners.</p>
+                            <a href="{{ route('agent.moderate.comments') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                Moderate Comments
                             </a>
                         </div>
                     </div>

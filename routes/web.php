@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\ClientRegistrationController;
 use App\Http\Controllers\Auth\PartnerRegistrationController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\AgentController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -89,6 +90,28 @@ Route::get('/dashboard/admin', [AdminDashboardController::class, 'index'])
     ->middleware(['auth', 'role:admin'])
     ->name('admin.dashboard');
 
+// Agent communication management routes
+Route::middleware(['auth', 'role:agent'])->group(function () {
+    // Rental management
+    Route::get('/agent/rentals', [AgentController::class, 'rentals'])->name('agent.rentals');
+    Route::get('/agent/rentals/{id}', [AgentController::class, 'showRental'])->name('agent.rental.show');
+
+    // Comment management
+    Route::get('/agent/rentals/{rentalId}/comments/create', [AgentController::class, 'createComment'])->name('agent.comment.create');
+    Route::post('/agent/rentals/{rentalId}/comments', [AgentController::class, 'storeComment'])->name('agent.comment.store');
+
+    // Evaluation form management
+    Route::get('/agent/rentals/{rentalId}/evaluation/create', [AgentController::class, 'createEvaluationForm'])->name('agent.evaluation.create');
+    Route::post('/agent/rentals/{rentalId}/evaluation', [AgentController::class, 'sendEvaluationForm'])->name('agent.evaluation.send');
+
+    // Comment moderation
+    Route::get('/agent/moderate/comments', [AgentController::class, 'moderateComments'])->name('agent.moderate.comments');
+    Route::post('/agent/comments/{id}/approve', [AgentController::class, 'approveComment'])->name('agent.comment.approve');
+    Route::post('/agent/comments/{id}/reject', [AgentController::class, 'rejectComment'])->name('agent.comment.reject');
+    Route::get('/agent/comments/{id}/edit', [AgentController::class, 'editComment'])->name('agent.comment.edit');
+    Route::put('/agent/comments/{id}', [AgentController::class, 'updateComment'])->name('agent.comment.update');
+});
+
 // Client rental routes
 Route::middleware(['auth', 'role:client'])->group(function () {
     // Rental management
@@ -98,13 +121,13 @@ Route::middleware(['auth', 'role:client'])->group(function () {
     Route::get('/rentals/{id}', [RentalController::class, 'show'])->name('rentals.show');
     Route::post('/rentals/{id}/cancel', [RentalController::class, 'cancel'])->name('rentals.cancel');
     Route::post('/rentals/{id}/rate', [RentalController::class, 'rate'])->name('rentals.rate');
-    
+
     // Rating routes
     Route::get('/rentals/{rentalId}/rate-bike', [RatingController::class, 'showBikeRatingForm'])->name('rentals.rate.bike.form');
     Route::post('/rentals/{rentalId}/rate-bike', [RatingController::class, 'storeBikeRating'])->name('rentals.rate.bike');
     Route::get('/rentals/{rentalId}/rate-user', [RatingController::class, 'showUserRatingForm'])->name('rentals.rate.user.form');
     Route::post('/rentals/{rentalId}/rate-user', [RatingController::class, 'storeUserRating'])->name('rentals.rate.user');
-    
+
     // Comment routes
     Route::get('/rentals/{rentalId}/comments', [CommentController::class, 'index'])->name('rentals.comments');
     Route::get('/rentals/{rentalId}/comments/create', [CommentController::class, 'create'])->name('rentals.comments.create');
@@ -154,7 +177,7 @@ Route::middleware(['auth', 'role:partner'])->group(function () {
     // Rating routes for partners
     Route::get('partner/rentals/{rentalId}/rate-user', [RatingController::class, 'showUserRatingForm'])->name('partner.rentals.rate.user.form');
     Route::post('partner/rentals/{rentalId}/rate-user', [RatingController::class, 'storeUserRating'])->name('partner.rentals.rate.user');
-    
+
     // Comment routes for partners
     Route::get('partner/rentals/{rentalId}/comments', [CommentController::class, 'index'])->name('partner.rentals.comments');
     Route::get('partner/rentals/{rentalId}/comments/create', [CommentController::class, 'create'])->name('partner.rentals.comments.create');

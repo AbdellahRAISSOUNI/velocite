@@ -20,6 +20,14 @@ class RentalComment extends Model
         'user_id',
         'content',
         'is_private',
+        'is_moderated',
+        'moderated_by',
+        'moderated_at',
+        'moderation_status',
+        'moderation_notes',
+        'original_content',
+        'agent_comment',
+        'agent_comment_visibility',
     ];
 
     /**
@@ -29,6 +37,9 @@ class RentalComment extends Model
      */
     protected $casts = [
         'is_private' => 'boolean',
+        'is_moderated' => 'boolean',
+        'moderated_at' => 'datetime',
+        'agent_comment' => 'boolean',
     ];
 
     /**
@@ -45,5 +56,44 @@ class RentalComment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the user who moderated the comment.
+     */
+    public function moderator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'moderated_by');
+    }
+
+    /**
+     * Check if comment is visible to a specific user.
+     */
+    public function isVisibleTo(User $user): bool
+    {
+        // Agents and admins can see all comments
+        if ($user->hasAnyRole(['agent', 'admin'])) {
+            return true;
+        }
+
+        // If it's not an agent comment, use standard visibility rules
+        if (!$this->agent_comment) {
+            // Public comments are visible to everyone involved in the rental
+            if (!$this->is_private) {
+                return $user->id === $this->rental->renter_id ||
+                       $user->id === $this->rental->bike->owner_id;
+            }
+
+            // Private comments are only visible to the author
+            return $user->id === $this->user_id;
+        }
+
+        // Agent comment visibility rules
+        $isClient = $user->id === $this->rental->renter_id;
+        $isPartner = $user->id === $this->rental->bike->owner_id;
+
+        return ($this->agent_comment_visibility === 'both') ||
+               ($this->agent_comment_visibility === 'client' && $isClient) ||
+               ($this->agent_comment_visibility === 'partner' && $isPartner);
     }
 }
