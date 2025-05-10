@@ -41,9 +41,9 @@
                 <div class="md:flex md:divide-x">
                     <!-- Bike Image -->
                     <div class="px-4 py-5 sm:px-6 md:w-1/3">
-                        <div class="h-48 bg-gray-200 rounded-md relative overflow-hidden">
+                        <div class="w-full h-48 sm:h-64 bg-gray-200 rounded-md overflow-hidden">
                             @if($rental->bike->primaryImage)
-                                <img src="{{ asset('storage/bikes/placeholder.jpg') }}" alt="{{ $rental->bike->title }}" class="w-full h-full object-cover">
+                                <img src="{{ asset('storage/' . $rental->bike->primaryImage->image_path) }}" alt="{{ $rental->bike->title }}" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
                                     <span class="text-gray-400">No image available</span>

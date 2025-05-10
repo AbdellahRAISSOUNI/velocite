@@ -158,7 +158,7 @@
                                     <a href="{{ route('bikes.show', $bike->id) }}" class="block">
                                         <div class="h-48 bg-gray-200 relative">
                                             @if($bike->primaryImage)
-                                                <img src="{{ asset('storage/bikes/placeholder.jpg') }}"
+                                                <img src="{{ asset('storage/' . $bike->primaryImage->image_path) }}"
                                                     alt="{{ $bike->title }}"
                                                     class="w-full h-full object-cover">
                                             @else
