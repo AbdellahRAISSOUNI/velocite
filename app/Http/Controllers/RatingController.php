@@ -8,6 +8,7 @@ use App\Models\Rental;
 use App\Models\User;
 use App\Models\UserRating;
 use App\Models\Notification;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,12 +16,15 @@ use Carbon\Carbon;
 
 class RatingController extends Controller
 {
+    protected $notificationService;
+
     /**
      * Create a new controller instance.
      */
-    public function __construct()
+    public function __construct(NotificationService $notificationService)
     {
         $this->middleware('auth');
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -94,16 +98,8 @@ class RatingController extends Controller
             $bike->average_rating = $bike->ratings()->avg('rating');
             $bike->save();
 
-            // Create notification for the bike owner
-            $notification = new Notification();
-            $notification->user_id = $rental->bike->owner_id;
-            $notification->type = 'new_bike_rating';
-            $notification->notifiable_id = $rating->id;
-            $notification->notifiable_type = get_class($rating);
-            $notification->content = Auth::user()->name . ' has rated your bike "' . $rental->bike->title . '" ' . $request->rating . ' out of 5';
-            $notification->is_read = false;
-            $notification->link = route('partner.rentals.show', $rental->id);
-            $notification->save();
+            // Use notification service instead of directly creating a notification
+            $this->notificationService->notifyBikeRating($rating);
 
             DB::commit();
 
@@ -209,19 +205,8 @@ class RatingController extends Controller
                 $ratedUser->profile->save();
             }
 
-            // Create notification for the rated user
-            $notification = new Notification();
-            $notification->user_id = $ratedUserId;
-            $notification->type = 'new_user_rating';
-            $notification->notifiable_id = $rating->id;
-            $notification->notifiable_type = get_class($rating);
-            $notification->content = Auth::user()->name . ' has rated you ' . $request->rating . ' out of 5';
-            $notification->is_read = false;
-            $notification->link = route(
-                $ratedUser->hasRole('partner') ? 'partner.rentals.show' : 'rentals.show',
-                $rental->id
-            );
-            $notification->save();
+            // Use notification service instead of directly creating a notification
+            $this->notificationService->notifyUserRating($rating);
 
             DB::commit();
 

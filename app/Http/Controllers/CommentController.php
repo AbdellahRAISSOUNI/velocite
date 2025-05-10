@@ -9,15 +9,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Services\NotificationService;
 
 class CommentController extends Controller
 {
+    protected $notificationService;
+
     /**
      * Create a new controller instance.
      */
-    public function __construct()
+    public function __construct(NotificationService $notificationService)
     {
         $this->middleware('auth');
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -34,20 +38,20 @@ class CommentController extends Controller
 
         // Get all visible comments based on user role
         $isOwner = Auth::id() === $rental->bike->owner_id;
-        
+
         // Get public comments that are visible to both parties
         $publicComments = $rental->comments()
             ->where('is_private', false)
             ->orderBy('created_at', 'desc')
             ->get();
-        
+
         // Get private comments visible to the current user
         $privateComments = $rental->comments()
             ->where('is_private', true)
             ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get();
-        
+
         // Combine comments
         $comments = $publicComments->merge($privateComments)->sortBy('created_at');
 
@@ -55,7 +59,7 @@ class CommentController extends Controller
         $clientHasCommented = $rental->comments()->where('user_id', $rental->renter_id)->exists();
         $partnerHasCommented = $rental->comments()->where('user_id', $rental->bike->owner_id)->exists();
         $bothHaveCommented = $clientHasCommented && $partnerHasCommented;
-        
+
         $oneWeekPassed = Carbon::parse($rental->created_at)->addWeek()->isPast();
         $showAllComments = $bothHaveCommented || $oneWeekPassed;
 
@@ -83,54 +87,28 @@ class CommentController extends Controller
     public function store(Request $request, string $rentalId)
     {
         $request->validate([
-            'content' => 'required|string|max:1000',
-            'is_private' => 'nullable|boolean',
+            'content' => 'required|string',
+            'is_private' => 'boolean',
         ]);
 
         $rental = Rental::findOrFail($rentalId);
 
-        // Check if user is authorized to comment on this rental
-        if (Auth::id() !== $rental->renter_id && Auth::id() !== $rental->bike->owner_id) {
-            abort(403, 'Unauthorized action.');
+        // Check if user is authorized to add comments to this rental
+        if (!$this->canAddComment(Auth::user(), $rental)) {
+            return back()->withErrors(['error' => 'You are not authorized to add comments to this rental.']);
         }
 
-        // Begin transaction
-        DB::beginTransaction();
+        $comment = new RentalComment();
+        $comment->rental_id = $rental->id;
+        $comment->user_id = Auth::id();
+        $comment->content = $request->content;
+        $comment->is_private = $request->has('is_private') ? true : false;
+        $comment->save();
 
-        try {
-            // Create the comment
-            $comment = $rental->comments()->create([
-                'user_id' => Auth::id(),
-                'content' => $request->content,
-                'is_private' => $request->has('is_private') && $request->is_private ? true : false,
-            ]);
+        // Generate notification
+        $this->notificationService->notifyNewComment($comment);
 
-            // If the comment is not private, create a notification for the other party
-            if (!$comment->is_private) {
-                $recipientId = Auth::id() === $rental->renter_id ? $rental->bike->owner_id : $rental->renter_id;
-                
-                $notification = new Notification();
-                $notification->user_id = $recipientId;
-                $notification->type = 'new_comment';
-                $notification->notifiable_id = $comment->id;
-                $notification->notifiable_type = get_class($comment);
-                $notification->content = Auth::user()->name . ' has added a comment to ' . 
-                    (Auth::id() === $rental->renter_id ? 'your bike rental' : 'their rental of your bike');
-                $notification->is_read = false;
-                $notification->link = Auth::id() === $rental->renter_id 
-                    ? route('partner.rentals.show', $rental->id)
-                    : route('rentals.show', $rental->id);
-                $notification->save();
-            }
-
-            DB::commit();
-
-            return redirect()->route(Auth::id() === $rental->renter_id ? 'rentals.show' : 'partner.rentals.show', $rental->id)
-                ->with('success', 'Comment added successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'An error occurred while adding your comment. Please try again.');
-        }
+        return redirect()->back()->with('success', 'Comment added successfully.');
     }
 
     /**

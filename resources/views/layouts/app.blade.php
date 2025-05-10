@@ -4,6 +4,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        @auth
+        <meta name="user-id" content="{{ Auth::id() }}">
+        @endauth
 
         <title>{{ config('app.name', 'Vélocité') }}</title>
 
@@ -47,6 +50,50 @@
                         <!-- User Account Dropdown -->
                         <div class="hidden sm:flex sm:items-center sm:ml-6">
                             @auth
+                                <!-- Notifications Dropdown -->
+                                <div class="ml-3 relative">
+                                    <div>
+                                        <button id="notification-button" type="button" class="relative flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 p-1">
+                                            <span class="sr-only">View notifications</span>
+                                            <svg class="h-6 w-6 text-gray-400 hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                            </svg>
+                                            <span id="notification-counter"
+                                                  class="{{ Auth::user()->unreadNotifications()->count() > 0 ? '' : 'hidden' }} absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
+                                                  data-count="{{ Auth::user()->unreadNotifications()->count() }}">
+                                                {{ Auth::user()->unreadNotifications()->count() > 99 ? '99+' : Auth::user()->unreadNotifications()->count() }}
+                                            </span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Notification Dropdown Menu -->
+                                    <div id="notification-dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                                        <div class="py-1 bg-gray-50 border-b">
+                                            <div class="flex justify-between items-center px-4 py-2">
+                                                <h3 class="text-sm font-medium text-gray-700">Notifications</h3>
+                                                <div class="flex space-x-2">
+                                                    <button id="mark-all-read" type="button" class="text-xs text-blue-600 hover:text-blue-800">
+                                                        Mark all as read
+                                                    </button>
+                                                    <a href="{{ route('notifications.index') }}" class="text-xs text-gray-600 hover:text-gray-800">
+                                                        View all
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="max-h-60 overflow-y-auto" id="notification-list">
+                                            <div class="py-4 text-center text-gray-500 text-sm">
+                                                Loading notifications...
+                                            </div>
+                                        </div>
+                                        <div class="py-1 bg-gray-50 border-t">
+                                            <button id="notification-load-more" type="button" class="w-full px-4 py-2 text-sm text-center text-blue-600 hover:text-blue-800 hover:bg-gray-100">
+                                                View all notifications
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="ml-3 relative">
                                     <x-dropdown align="right" width="48">
                                         <x-slot name="trigger">
@@ -64,6 +111,10 @@
                                         <x-slot name="content">
                                             <x-dropdown-link :href="route('profile.edit')">
                                                 {{ __('Profile') }}
+                                            </x-dropdown-link>
+
+                                            <x-dropdown-link :href="route('notifications.index')">
+                                                {{ __('Notifications') }}
                                             </x-dropdown-link>
 
                                             <!-- Authentication -->
@@ -128,6 +179,18 @@
                             <div class="mt-3 space-y-1">
                                 <x-responsive-nav-link :href="route('profile.edit')">
                                     {{ __('Profile') }}
+                                </x-responsive-nav-link>
+
+                                <!-- Notifications Link (Mobile) -->
+                                <x-responsive-nav-link :href="route('notifications.index')">
+                                    <div class="flex items-center">
+                                        {{ __('Notifications') }}
+                                        @if(Auth::user()->unreadNotifications()->count() > 0)
+                                            <span class="ml-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                                {{ Auth::user()->unreadNotifications()->count() > 99 ? '99+' : Auth::user()->unreadNotifications()->count() }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </x-responsive-nav-link>
 
                                 <!-- Authentication -->

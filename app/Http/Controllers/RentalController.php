@@ -9,15 +9,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Services\NotificationService;
 
 class RentalController extends Controller
 {
+    protected $notificationService;
+
     /**
      * Create a new controller instance.
      */
-    public function __construct()
+    public function __construct(NotificationService $notificationService)
     {
         $this->middleware('auth');
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -132,44 +136,32 @@ class RentalController extends Controller
     }
 
     /**
-     * Cancel a pending rental request.
+     * Cancel a rental.
      */
     public function cancel(Request $request, string $id)
     {
-        $request->validate([
-            'cancellation_reason' => 'nullable|string|max:500',
-        ]);
-
         $rental = Rental::findOrFail($id);
 
-        // Check if user is authorized to cancel this rental
-        if (Auth::id() !== $rental->renter_id) {
-            abort(403, 'Unauthorized action.');
+        // Authorization check
+        if ($rental->renter_id !== Auth::id()) {
+            return back()->withErrors(['error' => 'Unauthorized action.']);
         }
 
-        // Check if rental can be cancelled
+        // Can only cancel if status is pending or confirmed
         if (!in_array($rental->status, ['pending', 'confirmed'])) {
-            return back()->with('error', 'This rental cannot be cancelled');
+            return back()->withErrors(['error' => 'This rental cannot be cancelled.']);
         }
 
-        // Update rental status
+        $oldStatus = $rental->status;
         $rental->status = 'cancelled';
-        $rental->cancellation_reason = $request->cancellation_reason;
+        $rental->cancellation_reason = $request->input('reason');
         $rental->cancelled_at = now();
         $rental->save();
 
-        // Create notification for the bike owner
-        $notification = new Notification();
-        $notification->user_id = $rental->bike->owner_id;
-        $notification->type = 'rental_cancelled';
-        $notification->notifiable_id = $rental->id;
-        $notification->notifiable_type = Rental::class;
-        $notification->content = Auth::user()->name . ' has cancelled their rental for your bike "' . $rental->bike->title . '"';
-        $notification->is_read = false;
-        $notification->link = route('partner.rentals.show', $rental->id);
-        $notification->save();
+        // Generate notification
+        $this->notificationService->notifyRentalStatusChange($rental, $oldStatus, 'cancelled');
 
-        return redirect()->route('rentals.show', $rental->id)
+        return redirect()->route('rentals.index')
             ->with('success', 'Rental cancelled successfully.');
     }
 

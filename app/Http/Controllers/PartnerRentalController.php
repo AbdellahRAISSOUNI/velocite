@@ -9,15 +9,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Services\NotificationService;
 
 class PartnerRentalController extends Controller
 {
+    protected $notificationService;
+
     /**
      * Create a new controller instance.
      */
-    public function __construct()
+    public function __construct(NotificationService $notificationService)
     {
         $this->middleware(['auth', 'role:partner']);
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -80,39 +84,27 @@ class PartnerRentalController extends Controller
     /**
      * Approve a rental request.
      */
-    public function approve(string $id)
+    public function approve(Request $request, string $id)
     {
-        $rental = Rental::with('bike', 'renter')->findOrFail($id);
+        $rental = Rental::findOrFail($id);
 
-        // Check if the authenticated user owns the bike in this rental
-        if (Auth::id() !== $rental->bike->owner_id) {
-            abort(403, 'Unauthorized action.');
+        // Ensure the bike belongs to the authenticated partner
+        if ($rental->bike->owner_id !== Auth::id()) {
+            return back()->withErrors(['error' => 'Unauthorized action.']);
         }
 
-        // Check if rental can be approved
+        // Can only approve if status is pending
         if ($rental->status !== 'pending') {
-            return back()->with('error', 'This rental cannot be approved');
+            return back()->withErrors(['error' => 'This rental cannot be approved.']);
         }
 
-        // Check for any conflicting approved rentals
-        if (!$this->checkAvailability($rental->bike_id, $rental->start_date, $rental->end_date, $rental->id)) {
-            return back()->with('error', 'There is a scheduling conflict with another approved rental');
-        }
-
-        // Update rental status
+        $oldStatus = $rental->status;
         $rental->status = 'confirmed';
         $rental->save();
 
-        // Create notification for the renter
-        $notification = new Notification();
-        $notification->user_id = $rental->renter_id;
-        $notification->type = 'rental_approved';
-        $notification->notifiable_id = $rental->id;
-        $notification->notifiable_type = Rental::class;
-        $notification->content = 'Your rental request for "' . $rental->bike->title . '" has been approved';
-        $notification->is_read = false;
-        $notification->link = route('rentals.show', $rental->id);
-        $notification->save();
+        // Generate notification
+        $this->notificationService->notifyRentalStatusChange($rental, $oldStatus, 'confirmed');
+        $this->notificationService->notifyBookingConfirmation($rental);
 
         return redirect()->route('partner.rentals.show', $rental->id)
             ->with('success', 'Rental request approved successfully.');
@@ -124,39 +116,31 @@ class PartnerRentalController extends Controller
     public function reject(Request $request, string $id)
     {
         $request->validate([
-            'rejection_reason' => 'nullable|string|max:500',
+            'rejection_reason' => 'required|string|max:500',
         ]);
 
-        $rental = Rental::with('bike', 'renter')->findOrFail($id);
+        $rental = Rental::findOrFail($id);
 
-        // Check if the authenticated user owns the bike in this rental
-        if (Auth::id() !== $rental->bike->owner_id) {
-            abort(403, 'Unauthorized action.');
+        // Ensure the bike belongs to the authenticated partner
+        if ($rental->bike->owner_id !== Auth::id()) {
+            return back()->withErrors(['error' => 'Unauthorized action.']);
         }
 
-        // Check if rental can be rejected
+        // Can only reject if status is pending
         if ($rental->status !== 'pending') {
-            return back()->with('error', 'This rental cannot be rejected');
+            return back()->withErrors(['error' => 'This rental cannot be rejected.']);
         }
 
-        // Update rental status
+        $oldStatus = $rental->status;
         $rental->status = 'rejected';
-        $rental->cancellation_reason = $request->rejection_reason;
+        $rental->cancellation_reason = $request->input('rejection_reason');
         $rental->cancelled_at = now();
         $rental->save();
 
-        // Create notification for the renter
-        $notification = new Notification();
-        $notification->user_id = $rental->renter_id;
-        $notification->type = 'rental_rejected';
-        $notification->notifiable_id = $rental->id;
-        $notification->notifiable_type = Rental::class;
-        $notification->content = 'Your rental request for "' . $rental->bike->title . '" has been rejected';
-        $notification->is_read = false;
-        $notification->link = route('rentals.show', $rental->id);
-        $notification->save();
+        // Generate notification
+        $this->notificationService->notifyRentalStatusChange($rental, $oldStatus, 'rejected');
 
-        return redirect()->route('partner.rentals.show', $rental->id)
+        return redirect()->route('partner.rentals.index')
             ->with('success', 'Rental request rejected successfully.');
     }
 
