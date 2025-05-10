@@ -275,4 +275,68 @@ The architecture provides several extension points:
 3. **Event Listeners**: React to system events
 4. **Commands**: Add new console commands
 5. **Policies**: Define new authorization rules
-6. **API Resources**: Define new API response transformations 
+6. **API Resources**: Define new API response transformations
+
+## 8. Admin Dashboard System
+
+The Admin Dashboard provides comprehensive administrative capabilities for managing the Vélocité platform.
+
+### 8.1 Admin Controller Components
+
+- **AdminController**: Core controller that provides administrative functionality for managing users, bikes, categories, and analytics.
+  - User management (CRUD operations)
+  - Bike management and oversight
+  - Category management
+  - System statistics and reports
+
+### 8.2 Admin Dashboard Features
+
+#### 8.2.1 User Management
+- User listing with search and role filtering
+- User creation with profile information
+- User editing and deletion
+- Role assignment (client, partner, agent, admin)
+
+#### 8.2.2 Bike Management
+- Bike listing with search and filtering
+- Bike editing and status control
+- Integration with bike categories
+- Performance metrics tracking
+
+#### 8.2.3 Category Management
+- Category listing with bike counts
+- Category creation and editing
+- Category deletion (with dependency checks)
+
+#### 8.2.4 Statistics and Analytics
+- User statistics (counts, roles, growth)
+- Bike statistics (availability, categories)
+- Rental statistics (status, completion rates)
+- Monthly rental trend visualization
+
+#### 8.2.5 Business Reports
+- Revenue metrics and visualizations
+- Top user rankings (renters and partners)
+- Top performing bikes
+- Geographic distribution analysis
+
+### 8.3 Admin Interface Security
+
+- Role-based middleware protection (`role:admin`)
+- Data validation and sanitization
+- Dependency checks before destructive operations
+- Cross-user protection (preventing admins from deleting themselves)
+
+### 8.4 Implementation Details
+
+- Dashboard views using Tailwind CSS with responsive design
+- Interactive charts and visualizations
+- Efficient database queries with relationship loading
+- Real-time statistics calculation
+
+### 8.5 Integration with Other Systems
+
+- User system integration for comprehensive user management
+- Bike management system integration for bike oversight
+- Rental system integration for performance metrics
+- Comment and evaluation monitoring for quality control 

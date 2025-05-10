@@ -50,10 +50,10 @@
                                 <h4 class="text-red-800 font-medium mb-2">Admin Dashboard</h4>
                                 <p class="text-red-700">Manage all aspects of the Vélocité platform.</p>
                                 <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <a href="#" class="inline-flex items-center justify-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700">Users</a>
-                                    <a href="#" class="inline-flex items-center justify-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700">Bikes</a>
-                                    <a href="#" class="inline-flex items-center justify-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700">Rentals</a>
-                                    <a href="#" class="inline-flex items-center justify-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700">Settings</a>
+                                    <a href="{{ route('admin.users') }}" class="inline-flex items-center justify-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700">Users</a>
+                                    <a href="{{ route('admin.bikes') }}" class="inline-flex items-center justify-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700">Bikes</a>
+                                    <a href="{{ route('admin.statistics') }}" class="inline-flex items-center justify-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700">Statistics</a>
+                                    <a href="{{ route('admin.reports') }}" class="inline-flex items-center justify-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700">Reports</a>
                                 </div>
                             </div>
                         @endif

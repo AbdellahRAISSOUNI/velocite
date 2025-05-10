@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\PartnerRegistrationController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -110,6 +111,33 @@ Route::middleware(['auth', 'role:agent'])->group(function () {
     Route::post('/agent/comments/{id}/reject', [AgentController::class, 'rejectComment'])->name('agent.comment.reject');
     Route::get('/agent/comments/{id}/edit', [AgentController::class, 'editComment'])->name('agent.comment.edit');
     Route::put('/agent/comments/{id}', [AgentController::class, 'updateComment'])->name('agent.comment.update');
+});
+
+// Admin management routes
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    // User management
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::get('/admin/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
+    Route::post('/admin/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
+    Route::get('/admin/users/{id}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
+    Route::put('/admin/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+    Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+
+    // Bike management
+    Route::get('/admin/bikes', [AdminController::class, 'bikes'])->name('admin.bikes');
+    Route::get('/admin/bikes/{id}/edit', [AdminController::class, 'editBike'])->name('admin.bikes.edit');
+    Route::put('/admin/bikes/{id}', [AdminController::class, 'updateBike'])->name('admin.bikes.update');
+    Route::delete('/admin/bikes/{id}', [AdminController::class, 'deleteBike'])->name('admin.bikes.delete');
+
+    // Category management
+    Route::get('/admin/categories', [AdminController::class, 'categories'])->name('admin.categories');
+    Route::post('/admin/categories', [AdminController::class, 'storeCategory'])->name('admin.categories.store');
+    Route::put('/admin/categories/{id}', [AdminController::class, 'updateCategory'])->name('admin.categories.update');
+    Route::delete('/admin/categories/{id}', [AdminController::class, 'deleteCategory'])->name('admin.categories.delete');
+
+    // Statistics and reporting
+    Route::get('/admin/statistics', [AdminController::class, 'statistics'])->name('admin.statistics');
+    Route::get('/admin/reports', [AdminController::class, 'reports'])->name('admin.reports');
 });
 
 // Client rental routes
