@@ -12,6 +12,8 @@ use App\Http\Controllers\RentalController;
 use App\Http\Controllers\PartnerRentalController;
 use App\Http\Controllers\Auth\ClientRegistrationController;
 use App\Http\Controllers\Auth\PartnerRegistrationController;
+use App\Http\Controllers\RatingController;
+use App\Http\Controllers\CommentController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -96,6 +98,19 @@ Route::middleware(['auth', 'role:client'])->group(function () {
     Route::get('/rentals/{id}', [RentalController::class, 'show'])->name('rentals.show');
     Route::post('/rentals/{id}/cancel', [RentalController::class, 'cancel'])->name('rentals.cancel');
     Route::post('/rentals/{id}/rate', [RentalController::class, 'rate'])->name('rentals.rate');
+    
+    // Rating routes
+    Route::get('/rentals/{rentalId}/rate-bike', [RatingController::class, 'showBikeRatingForm'])->name('rentals.rate.bike.form');
+    Route::post('/rentals/{rentalId}/rate-bike', [RatingController::class, 'storeBikeRating'])->name('rentals.rate.bike');
+    Route::get('/rentals/{rentalId}/rate-user', [RatingController::class, 'showUserRatingForm'])->name('rentals.rate.user.form');
+    Route::post('/rentals/{rentalId}/rate-user', [RatingController::class, 'storeUserRating'])->name('rentals.rate.user');
+    
+    // Comment routes
+    Route::get('/rentals/{rentalId}/comments', [CommentController::class, 'index'])->name('rentals.comments');
+    Route::get('/rentals/{rentalId}/comments/create', [CommentController::class, 'create'])->name('rentals.comments.create');
+    Route::post('/rentals/{rentalId}/comments', [CommentController::class, 'store'])->name('rentals.comments.store');
+    Route::put('/comments/{id}', [CommentController::class, 'update'])->name('comments.update');
+    Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('comments.destroy');
 });
 
 // Partner bike management routes
@@ -135,6 +150,15 @@ Route::middleware(['auth', 'role:partner'])->group(function () {
     Route::post('partner/rentals/{id}/start', [PartnerRentalController::class, 'start'])->name('partner.rentals.start');
     Route::post('partner/rentals/{id}/complete', [PartnerRentalController::class, 'complete'])->name('partner.rentals.complete');
     Route::post('partner/rentals/{id}/comment', [PartnerRentalController::class, 'addComment'])->name('partner.rentals.comment');
+
+    // Rating routes for partners
+    Route::get('partner/rentals/{rentalId}/rate-user', [RatingController::class, 'showUserRatingForm'])->name('partner.rentals.rate.user.form');
+    Route::post('partner/rentals/{rentalId}/rate-user', [RatingController::class, 'storeUserRating'])->name('partner.rentals.rate.user');
+    
+    // Comment routes for partners
+    Route::get('partner/rentals/{rentalId}/comments', [CommentController::class, 'index'])->name('partner.rentals.comments');
+    Route::get('partner/rentals/{rentalId}/comments/create', [CommentController::class, 'create'])->name('partner.rentals.comments.create');
+    Route::post('partner/rentals/{rentalId}/comments', [CommentController::class, 'store'])->name('partner.rentals.comments.store');
 });
 
 // Profile routes

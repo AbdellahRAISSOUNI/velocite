@@ -138,127 +138,65 @@
                         </button>
                     </form>
                 @elseif($rental->status === 'confirmed')
-                    <div class="text-sm text-gray-600">
+                    <div class="text-sm text-gray-600 mb-4">
                         Your rental has been confirmed. Please pick up the bike at the designated location on {{ $rental->start_date->format('M d, Y') }}.
                     </div>
                 @elseif($rental->status === 'ongoing')
-                    <div class="text-sm text-gray-600">
+                    <div class="text-sm text-gray-600 mb-4">
                         Your rental is currently ongoing. Please return the bike at the designated location by {{ $rental->end_date->format('M d, Y') }}.
                     </div>
-                @elseif($rental->status === 'completed' && !$rental->bikeRating()->exists())
-                    <div id="rate" class="border-t border-gray-200 pt-4 mt-4">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Rate Your Experience</h3>
-                        <form action="{{ route('rentals.rate', $rental->id) }}" method="POST">
-                            @csrf
-                            <div class="mb-4">
-                                <label for="rating" class="block text-sm font-medium text-gray-700 mb-1">Rating (1-5 stars)</label>
-                                <div class="flex items-center">
-                                    <div class="flex items-center space-x-1">
-                                        @for($i = 1; $i <= 5; $i++)
-                                            <label class="cursor-pointer">
-                                                <input type="radio" name="rating" value="{{ $i }}" class="sr-only" {{ old('rating') == $i ? 'checked' : '' }}>
-                                                <svg class="w-8 h-8 text-gray-300 rating-star hover:text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" data-value="{{ $i }}">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                </svg>
-                                            </label>
-                                        @endfor
-                                    </div>
-                                </div>
-                                @error('rating')
-                                    <p class="mt-1 text-red-500 text-xs">{{ $message }}</p>
-                                @enderror
-                            </div>
+                @elseif($rental->status === 'completed')
+                    <div class="flex items-center justify-between">
+                        <div class="flex space-x-2">
+                            @if(!$rental->bikeRating()->exists())
+                                <a href="{{ route('rentals.rate.bike.form', $rental->id) }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                    </svg>
+                                    Rate Bike
+                                </a>
+                            @else
+                                <span class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-gray-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    Bike Rated
+                                </span>
+                            @endif
 
-                            <div class="mb-4">
-                                <label for="review" class="block text-sm font-medium text-gray-700 mb-1">Review (optional)</label>
-                                <textarea name="review" id="review" rows="3" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ old('review') }}</textarea>
-                                @error('review')
-                                    <p class="mt-1 text-red-500 text-xs">{{ $message }}</p>
-                                @enderror
-                            </div>
+                            @php
+                                $userRating = $rental->userRatings()
+                                    ->where('rater_id', auth()->id())
+                                    ->where('rated_user_id', $rental->bike->owner_id)
+                                    ->first();
+                            @endphp
 
-                            <div>
-                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    Submit Rating
-                                </button>
-                            </div>
-                        </form>
+                            @if(!$userRating)
+                                <a href="{{ route('rentals.rate.user.form', $rental->id) }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    Rate Owner
+                                </a>
+                            @else
+                                <span class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-gray-100">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    Owner Rated
+                                </span>
+                            @endif
+                        </div>
+
+                        <a href="{{ route('rentals.comments', $rental->id) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                            </svg>
+                            Comments ({{ $rental->comments->count() }})
+                        </a>
                     </div>
                 @endif
             </div>
         </div>
     </div>
-
-    @if($rental->status === 'completed' && !$rental->bikeRating()->exists())
-        @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const stars = document.querySelectorAll('.rating-star');
-                const ratingInputs = document.querySelectorAll('input[name="rating"]');
-
-                stars.forEach(star => {
-                    star.addEventListener('mouseover', function() {
-                        const value = this.dataset.value;
-
-                        stars.forEach(s => {
-                            if (s.dataset.value <= value) {
-                                s.classList.add('text-yellow-400');
-                                s.classList.remove('text-gray-300');
-                            } else {
-                                s.classList.add('text-gray-300');
-                                s.classList.remove('text-yellow-400');
-                            }
-                        });
-                    });
-
-                    star.addEventListener('mouseout', function() {
-                        const checkedInput = document.querySelector('input[name="rating"]:checked');
-                        const checkedValue = checkedInput ? checkedInput.value : 0;
-
-                        stars.forEach(s => {
-                            if (s.dataset.value <= checkedValue) {
-                                s.classList.add('text-yellow-400');
-                                s.classList.remove('text-gray-300');
-                            } else {
-                                s.classList.add('text-gray-300');
-                                s.classList.remove('text-yellow-400');
-                            }
-                        });
-                    });
-
-                    star.addEventListener('click', function() {
-                        const value = this.dataset.value;
-                        ratingInputs.forEach(input => {
-                            if (input.value === value) {
-                                input.checked = true;
-                            }
-                        });
-
-                        stars.forEach(s => {
-                            if (s.dataset.value <= value) {
-                                s.classList.add('text-yellow-400');
-                                s.classList.remove('text-gray-300');
-                            } else {
-                                s.classList.add('text-gray-300');
-                                s.classList.remove('text-yellow-400');
-                            }
-                        });
-                    });
-                });
-
-                // Set initial state if there's a previously selected rating
-                const checkedInput = document.querySelector('input[name="rating"]:checked');
-                if (checkedInput) {
-                    const checkedValue = checkedInput.value;
-                    stars.forEach(s => {
-                        if (s.dataset.value <= checkedValue) {
-                            s.classList.add('text-yellow-400');
-                            s.classList.remove('text-gray-300');
-                        }
-                    });
-                }
-            });
-        </script>
-        @endpush
-    @endif
 </x-app-layout>

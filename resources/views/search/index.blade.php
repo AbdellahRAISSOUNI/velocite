@@ -69,9 +69,9 @@
                         <select name="min_rating" id="min_rating"
                             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <option value="">Any Rating</option>
-                            <option value="4" {{ request('min_rating') == '4' ? 'selected' : '' }}>4+ Stars</option>
-                            <option value="3" {{ request('min_rating') == '3' ? 'selected' : '' }}>3+ Stars</option>
-                            <option value="2" {{ request('min_rating') == '2' ? 'selected' : '' }}>2+ Stars</option>
+                            <option value="4" {{ request('min_rating') == '4' ? 'selected' : '' }}>4+</option>
+                            <option value="3" {{ request('min_rating') == '3' ? 'selected' : '' }}>3+</option>
+                            <option value="2" {{ request('min_rating') == '2' ? 'selected' : '' }}>2+</option>
                         </select>
                     </div>
 
