@@ -61,7 +61,13 @@
                                                 <td class="px-4 py-4 whitespace-nowrap">
                                                     <div class="flex items-center">
                                                         <div class="h-10 w-10 flex-shrink-0 bg-gray-200 rounded-md overflow-hidden">
-                                                            <img src="{{ asset('storage/bikes/placeholder.jpg') }}" alt="{{ $rental->bike->title }}" class="h-full w-full object-cover">
+                                                            @if($rental->bike->primaryImage)
+                                                                <img src="{{ asset('storage/' . $rental->bike->primaryImage->image_path) }}" alt="{{ $rental->bike->title }}" class="h-full w-full object-cover">
+                                                            @else
+                                                                <div class="w-full h-full flex items-center justify-center">
+                                                                    <span class="text-gray-400">No image</span>
+                                                                </div>
+                                                            @endif
                                                         </div>
                                                         <div class="ml-4">
                                                             <div class="text-sm font-medium text-gray-900">{{ $rental->bike->title }}</div>
@@ -129,7 +135,7 @@
                                     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                         <div class="h-40 bg-gray-200 relative">
                                             @if($bike->primaryImage)
-                                                <img src="{{ asset('storage/bikes/placeholder.jpg') }}"
+                                                <img src="{{ asset('storage/' . $bike->primaryImage->image_path) }}"
                                                     alt="{{ $bike->title }}"
                                                     class="w-full h-full object-cover">
                                             @else

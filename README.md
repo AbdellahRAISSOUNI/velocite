@@ -50,6 +50,20 @@ Vélocité is a comprehensive bike rental platform that connects bike owners (pa
 - Post-rental rating and review system
 - Notifications for all rental status changes
 
+### Notification System
+- Real-time notifications for important events
+- Notification bell with unread count
+- Dropdown notification list
+- Dedicated notifications page with filtering options
+- Toast notifications for immediate alerts
+- Notification types:
+  - Rental status changes
+  - New comments
+  - Rating submissions
+  - Booking confirmations
+  
+For more details, see [Notification System Documentation](docs/notification-system.md).
+
 ### For Administrators
 - Manage user accounts
 - Approve partner applications
@@ -122,6 +136,7 @@ For more detailed documentation, please check:
 - [Bike Management](docs/bike-management.md)
 - [User Management](docs/user-management.md)
 - [Rental System](docs/rental-system.md)
+- [Notification System](docs/notification-system.md)
 - [Changes Log](docs/CHANGES.md)
 
 ## License

@@ -74,11 +74,9 @@
                     @foreach($bikes as $bike)
                         <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                             <a href="{{ route('bikes.show', $bike->id) }}" class="block">
-                                <div class="h-48 bg-gray-200 relative">
+                                <div class="h-48 bg-gray-200 rounded-md overflow-hidden">
                                     @if($bike->primaryImage)
-                                        <img src="{{ asset('storage/bikes/placeholder.jpg') }}"
-                                            alt="{{ $bike->title }}"
-                                            class="w-full h-full object-cover">
+                                        <img src="{{ asset('storage/' . $bike->primaryImage->image_path) }}" alt="{{ $bike->title }}" class="w-full h-full object-cover">
                                     @else
                                         <div class="w-full h-full flex items-center justify-center">
                                             <span class="text-gray-400">No image available</span>

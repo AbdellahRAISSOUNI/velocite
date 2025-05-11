@@ -94,14 +94,12 @@
                                 <div id="bike-item-{{ $bike->id }}" class="bike-item border border-gray-200 rounded-lg p-3 hover:bg-blue-50 cursor-pointer transition"
                                      onclick="highlightMarker({{ $bike->id }}, {{ $bike->latitude }}, {{ $bike->longitude }})">
                                     <div class="flex">
-                                        <div class="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
+                                        <div class="h-24 w-24 bg-gray-200 rounded-md overflow-hidden mr-4">
                                             @if($bike->primaryImage)
-                                                <img src="{{ asset('storage/bikes/placeholder.jpg') }}"
-                                                    alt="{{ $bike->title }}"
-                                                    class="w-full h-full object-cover">
+                                                <img src="{{ asset('storage/' . $bike->primaryImage->image_path) }}" alt="{{ $bike->title }}" class="w-full h-full object-cover">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center">
-                                                    <span class="text-gray-400 text-xs">No image</span>
+                                                    <span class="text-gray-400">No image</span>
                                                 </div>
                                             @endif
                                         </div>

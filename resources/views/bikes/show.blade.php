@@ -46,12 +46,11 @@
             <div class="md:col-span-2">
                 <div class="bg-gray-100 rounded-lg overflow-hidden mb-4">
                     @if($bike->primaryImage)
-                        <img src="{{ asset('storage/bikes/placeholder.jpg') }}"
+                        <img src="{{ asset('storage/' . $bike->primaryImage->image_path) }}"
                             alt="{{ $bike->title }}"
-                            class="w-full h-auto object-cover"
-                            style="max-height: 400px;">
+                            class="w-full h-full object-cover rounded-lg shadow-md">
                     @else
-                        <div class="w-full h-64 flex items-center justify-center bg-gray-200">
+                        <div class="w-full h-full flex items-center justify-center bg-gray-200 rounded-lg shadow-md">
                             <span class="text-gray-400">No image available</span>
                         </div>
                     @endif
@@ -61,7 +60,7 @@
                     <div class="grid grid-cols-4 gap-2">
                         @foreach($bike->images as $image)
                             <div class="bg-gray-100 rounded-lg overflow-hidden">
-                                <img src="{{ asset('storage/bikes/placeholder.jpg') }}"
+                                <img src="{{ asset('storage/' . $image->image_path) }}"
                                     alt="{{ $bike->title }}"
                                     class="w-full h-24 object-cover">
                             </div>
@@ -247,6 +246,22 @@
             </div>
         </div>
         @endif
+
+        <!-- Bike Images Gallery -->
+        <div class="mt-8">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">More Photos</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                @forelse($bike->images as $image)
+                    <div class="overflow-hidden rounded-lg h-40 bg-gray-200">
+                        <img src="{{ asset('storage/' . $image->image_path) }}"
+                            alt="{{ $bike->title }}"
+                            class="w-full h-full object-cover">
+                    </div>
+                @empty
+                    <p class="col-span-4 text-gray-500 text-center py-8">No additional photos available</p>
+                @endforelse
+            </div>
+        </div>
     </main>
 
     <!-- Footer -->

@@ -44,7 +44,7 @@
                     <div class="px-4 py-5 sm:px-6 md:w-1/3">
                         <div class="h-48 bg-gray-200 rounded-md relative overflow-hidden">
                             @if($rental->bike->primaryImage)
-                                <img src="{{ asset('storage/bikes/placeholder.jpg') }}" alt="{{ $rental->bike->title }}" class="w-full h-full object-cover">
+                                <img src="{{ asset('storage/' . $rental->bike->primaryImage->image_path) }}" alt="{{ $rental->bike->title }}" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
                                     <span class="text-gray-400">No image available</span>
@@ -174,7 +174,7 @@
                                     ->where('rated_user_id', $rental->renter_id)
                                     ->first();
                             @endphp
-                            
+
                             @if(!$userRating)
                                 <a href="{{ route('partner.rentals.rate.user.form', $rental->id) }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -191,7 +191,7 @@
                                 </span>
                             @endif
                         </div>
-                        
+
                         <a href="{{ route('partner.rentals.comments', $rental->id) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />

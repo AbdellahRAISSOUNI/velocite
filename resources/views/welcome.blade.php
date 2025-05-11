@@ -244,21 +244,20 @@
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         @foreach($featuredBikes as $bike)
-                            <div class="group relative bg-white dark:bg-gray-700 rounded-xl shadow-lg overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 animate__animated animate__fadeInUp">
-                                <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-600 h-56 relative overflow-hidden">
-                                    @if($bike->primaryImage)
-                                        <img src="{{ asset('storage/bikes/placeholder.jpg') }}" alt="{{ $bike->title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                                    @else
-                                        <div class="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-600">
-                                            <span class="text-gray-400 dark:text-gray-300">No image available</span>
-                                        </div>
-                                    @endif
-                                    <div class="absolute top-0 right-0 bg-gradient-to-r from-blue-600 to-cyan-500 text-white py-1 px-3 text-xs font-bold rounded-bl-lg">
-                                        Featured
-                                    </div>
-                                    @if($bike->is_electric)
-                                        <div class="absolute top-0 left-0 bg-green-600 text-white py-1 px-3 text-xs font-bold rounded-br-lg">
-                                            Electric
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                                <a href="{{ route('bikes.show', $bike->id) }}" class="block">
+                                    <div class="h-48 bg-gray-200 relative">
+                                        @if($bike->primaryImage)
+                                            <img src="{{ asset('storage/bikes/placeholder.jpg') }}"
+                                                alt="{{ $bike->title }}"
+                                                class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full flex items-center justify-center">
+                                                <span class="text-gray-400">No image available</span>
+                                            </div>
+                                        @endif
+                                        <div class="absolute top-0 right-0 bg-blue-600 text-white py-1 px-3 text-sm font-semibold">
+                                            Featured
                                         </div>
                                     @endif
                                 </div>
@@ -316,18 +315,54 @@
                             <div class="relative bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full h-24 w-24 flex items-center justify-center mx-auto shadow-lg hover:scale-110 transition-transform duration-500">
                                 <lottie-player src="https://assets1.lottiefiles.com/packages/lf20_80nu1m6q.json" background="transparent" speed="1" style="width: 60px; height: 60px;" loop autoplay></lottie-player>
                             </div>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">1. Find Your Perfect Bike</h3>
-                        <p class="text-gray-600 dark:text-gray-400">
-                            Browse our curated selection of premium bikes and choose the one that matches your style and needs.
-                        </p>
-                    </div>
-                    
-                    <div class="text-center animate__animated animate__fadeInUp">
-                        <div class="relative mx-auto mb-6">
-                            <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full opacity-20 blur-lg animate-pulse"></div>
-                            <div class="relative bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full h-24 w-24 flex items-center justify-center mx-auto shadow-lg hover:scale-110 transition-transform duration-500">
-                                <lottie-player src="https://assets1.lottiefiles.com/packages/lf20_4kx2q32h.json" background="transparent" speed="1" style="width: 60px; height: 60px;" loop autoplay></lottie-player>
+
+                @if(isset($bikes) && $bikes->count() > 0)
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        @foreach($bikes as $bike)
+                            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                                <a href="{{ route('bikes.show', $bike->id) }}" class="block">
+                                    <div class="h-48 bg-gray-200 relative">
+                                        @if($bike->primaryImage)
+                                            <img src="{{ asset('storage/bikes/placeholder.jpg') }}"
+                                                alt="{{ $bike->title }}"
+                                                class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full flex items-center justify-center">
+                                                <span class="text-gray-400">No image available</span>
+                                            </div>
+                                        @endif
+                                        @if($bike->is_electric)
+                                            <div class="absolute top-0 right-0 bg-green-600 text-white py-1 px-3 text-xs font-semibold">
+                                                Electric
+                                            </div>
+                                        @endif
+                                    </div>
+                                </a>
+                                <div class="p-4">
+                                    <div class="flex justify-between items-start">
+                                        <a href="{{ route('bikes.show', $bike->id) }}" class="text-lg font-semibold text-gray-900 hover:text-blue-600">{{ $bike->title }}</a>
+                                        <span class="text-sm text-gray-500">{{ $bike->location }}</span>
+                                    </div>
+                                    <div class="flex items-center mt-1">
+                                        <span class="text-yellow-400 mr-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                                        </span>
+                                        <span class="text-sm text-gray-600">
+                                            {{ number_format($bike->average_rating, 1) }} ({{ $bike->rating_count }})
+                                        </span>
+                                        <span class="mx-2 text-gray-300">|</span>
+                                        <span class="text-sm text-gray-600">{{ $bike->category->name }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-4">
+                            <div>
+                                            <span class="text-blue-600 font-semibold">€{{ number_format($bike->daily_rate, 2) }}</span>
+                                            <span class="text-gray-600 text-sm">/ day</span>
+                                        </div>
+                                        <a href="{{ route('bikes.show', $bike->id) }}" class="bg-blue-600 text-white text-sm py-1 px-3 rounded hover:bg-blue-700">View</a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">2. Book With Ease</h3>

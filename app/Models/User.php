@@ -166,4 +166,14 @@ class User extends Authenticatable
         }
         return 0;
     }
+
+    /**
+     * Get the user's profile picture URL.
+     */
+    public function getProfilePictureUrlAttribute()
+    {
+        return $this->profile && $this->profile->profile_picture
+            ? asset('storage/' . $this->profile->profile_picture)
+            : asset('img/default-profile.jpg');
+    }
 }

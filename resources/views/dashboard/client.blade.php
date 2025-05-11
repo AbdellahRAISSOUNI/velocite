@@ -40,17 +40,14 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 @foreach($upcomingRentals as $rental)
                                     <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                                        <div class="h-36 bg-gray-100 relative">
+                                        <div class="h-24 w-24 bg-gray-200 rounded-md overflow-hidden">
                                             @if($rental->bike->primaryImage)
-                                                <img src="{{ asset('storage/bikes/placeholder.jpg') }}" alt="{{ $rental->bike->title }}" class="w-full h-full object-cover">
+                                                <img src="{{ asset('storage/' . $rental->bike->primaryImage->image_path) }}" alt="{{ $rental->bike->title }}" class="w-full h-full object-cover">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center">
-                                                    <span class="text-gray-400">No image available</span>
+                                                    <span class="text-gray-400">No image</span>
                                                 </div>
                                             @endif
-                                            <div class="absolute top-0 right-0 bg-blue-600 text-white py-1 px-3 text-xs font-semibold">
-                                                {{ $rental->start_date->format('M d, Y') }}
-                                            </div>
                                         </div>
                                         <div class="p-4">
                                             <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ $rental->bike->title }}</h3>
@@ -107,8 +104,14 @@
                                             <tr>
                                                 <td class="px-4 py-4 whitespace-nowrap">
                                                     <div class="flex items-center">
-                                                        <div class="h-10 w-10 flex-shrink-0 bg-gray-200 rounded-md overflow-hidden">
-                                                            <img src="{{ asset('storage/bikes/placeholder.jpg') }}" alt="{{ $rental->bike->title }}" class="h-full w-full object-cover">
+                                                        <div class="h-24 w-24 bg-gray-200 rounded-md overflow-hidden">
+                                                            @if($rental->bike->primaryImage)
+                                                                <img src="{{ asset('storage/' . $rental->bike->primaryImage->image_path) }}" alt="{{ $rental->bike->title }}" class="w-full h-full object-cover">
+                                                            @else
+                                                                <div class="w-full h-full flex items-center justify-center">
+                                                                    <span class="text-gray-400">No image</span>
+                                                                </div>
+                                                            @endif
                                                         </div>
                                                         <div class="ml-4">
                                                             <div class="text-sm font-medium text-gray-900">{{ $rental->bike->title }}</div>

@@ -35,7 +35,7 @@
                             <div class="mb-4 sm:mb-0 sm:mr-6 sm:w-32 lg:w-48 flex-shrink-0">
                                 <div class="w-full h-24 bg-gray-200 rounded-md relative overflow-hidden">
                                     @if($rental->bike->primaryImage)
-                                        <img src="{{ asset('storage/bikes/placeholder.jpg') }}" alt="{{ $rental->bike->title }}" class="w-full h-full object-cover">
+                                        <img src="{{ asset('storage/' . $rental->bike->primaryImage->image_path) }}" alt="{{ $rental->bike->title }}" class="w-full h-full object-cover">
                                     @else
                                         <div class="w-full h-full flex items-center justify-center">
                                             <span class="text-gray-400">No image</span>
