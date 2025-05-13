@@ -17,6 +17,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\BikeAvailabilityController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -183,9 +184,9 @@ Route::middleware(['auth', 'role:partner'])->group(function () {
         ->name('partner.bikes.toggle-availability');
 
     // Availability management
-    Route::get('partner/bikes/{bike}/availability', [BikeController::class, 'manageAvailability'])
+    Route::get('partner/bikes/{bike}/availability', [BikeAvailabilityController::class, 'manageAvailability'])
         ->name('partner.bikes.availability');
-    Route::post('partner/bikes/{bike}/availability', [BikeController::class, 'updateAvailability'])
+    Route::post('partner/bikes/{bike}/availability', [BikeAvailabilityController::class, 'updateAvailability'])
         ->name('partner.bikes.update-availability');
 
     // Premium listing management
@@ -227,6 +228,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read.all');
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::delete('/notifications', [NotificationController::class, 'clearAll'])->name('notifications.clear.all');
+});
+
+// Bike Availability Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/bikes/{bike}/availability', [BikeAvailabilityController::class, 'edit'])->name('bikes.availability.edit');
+    Route::post('/bikes/{bike}/availability', [BikeAvailabilityController::class, 'store'])->name('bikes.availability.store');
+    Route::get('/bikes/{bike}/availability/ranges', [BikeAvailabilityController::class, 'getAvailableRanges'])->name('bikes.availability.ranges');
 });
 
 require __DIR__.'/auth.php';

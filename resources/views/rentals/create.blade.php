@@ -21,7 +21,7 @@
 
                         <div class="w-full h-48 bg-gray-200 rounded-md relative overflow-hidden mb-4">
                             @if($bike->primaryImage)
-                                <img src="{{ asset('storage/bikes/placeholder.jpg') }}" alt="{{ $bike->title }}" class="w-full h-full object-cover">
+                                <img src="{{ asset('storage/' . $bike->primaryImage->image_path) }}" alt="{{ $bike->title }}" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
                                     <span class="text-gray-400">No image available</span>
@@ -51,12 +51,33 @@
                             <p class="text-sm text-gray-800">{{ $bike->owner->name }}</p>
                         </div>
                     </div>
+                    
+                    <!-- Available Date Ranges -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">Available Date Ranges</h4>
+                        <div class="space-y-2 mb-3">
+                            @if(count($bike->getAvailableDateRanges()) > 0)
+                                @foreach($bike->getAvailableDateRanges() as $range)
+                                    <div class="text-sm py-2 px-3 bg-blue-50 rounded border border-blue-100 flex justify-between">
+                                        <span>{{ \Carbon\Carbon::parse($range['start_date'])->format('d M Y') }}</span>
+                                        <span class="px-2">to</span>
+                                        <span>{{ \Carbon\Carbon::parse($range['end_date'])->format('d M Y') }}</span>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="text-sm py-2 px-3 bg-gray-100 rounded">
+                                    No availability set by the owner
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-5 md:mt-0 md:col-span-2">
                     <form action="{{ route('rentals.store') }}" method="POST">
                         @csrf
                         <input type="hidden" name="bike_id" value="{{ $bike->id }}">
+                        <input type="hidden" id="available_dates" value="{{ json_encode($availableDates ?? []) }}">
 
                         <div class="px-4 py-5 bg-white sm:p-6">
                             <div class="grid grid-cols-1 gap-6">
@@ -68,6 +89,7 @@
                                     @error('start_date')
                                         <p class="mt-1 text-red-500 text-xs">{{ $message }}</p>
                                     @enderror
+                                    <p class="mt-1 text-xs text-gray-500" id="start-date-help">Please select a date from the available ranges</p>
                                 </div>
 
                                 <div class="col-span-1 sm:col-span-1">
@@ -77,6 +99,7 @@
                                     @error('end_date')
                                         <p class="mt-1 text-red-500 text-xs">{{ $message }}</p>
                                     @enderror
+                                    <p class="mt-1 text-xs text-gray-500" id="end-date-help">End date must be within the same available range</p>
                                 </div>
 
                                 <div id="price-calculation" class="col-span-1 bg-gray-50 p-4 rounded-lg hidden">
@@ -91,6 +114,17 @@
                                     </div>
                                 </div>
 
+                                <div id="availability-warning" class="col-span-1 bg-yellow-50 p-4 rounded-lg border border-yellow-200 hidden">
+                                    <div class="flex">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                        <p class="text-sm text-yellow-700">
+                                            The selected dates will be temporarily held for your booking until the owner responds to your request.
+                                        </p>
+                                    </div>
+                                </div>
+
                                 <div class="col-span-1">
                                     <label for="pickup_notes" class="block text-sm font-medium text-gray-700">Pickup Notes (Optional)</label>
                                     <textarea id="pickup_notes" name="pickup_notes" rows="3" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('pickup_notes') }}</textarea>
@@ -102,7 +136,7 @@
                         </div>
 
                         <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <button type="submit" id="book-button" disabled class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
                                 Book Now
                             </button>
                         </div>
@@ -118,9 +152,66 @@
             const startDateInput = document.getElementById('start_date');
             const endDateInput = document.getElementById('end_date');
             const priceCalculation = document.getElementById('price-calculation');
+            const availabilityWarning = document.getElementById('availability-warning');
             const daysCount = document.getElementById('days-count');
             const totalPrice = document.getElementById('total-price');
-            const dailyRate = {{ $bike->daily_rate }};
+            const bookButton = document.getElementById('book-button');
+            const dailyRate = parseFloat("{{ $bike->daily_rate }}");
+            
+            // Parse available dates from JSON
+            const availableDateRanges = JSON.parse('{{ json_encode($bike->getAvailableDateRanges()) }}'.replace(/&quot;/g, '"'));
+            const allAvailableDates = new Set();
+            
+            // Create a flat array of all available dates
+            availableDateRanges.forEach(range => {
+                const start = new Date(range.start_date);
+                const end = new Date(range.end_date);
+                
+                // Add all dates in the range to the set
+                for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+                    allAvailableDates.add(date.toISOString().split('T')[0]);
+                }
+            });
+            
+            function isDateInAvailableRange(dateStr) {
+                return allAvailableDates.has(dateStr);
+            }
+            
+            // Find range that contains a date
+            function findDateRange(dateStr) {
+                const checkDate = new Date(dateStr);
+                
+                for (const range of availableDateRanges) {
+                    const start = new Date(range.start_date);
+                    const end = new Date(range.end_date);
+                    
+                    if (checkDate >= start && checkDate <= end) {
+                        return { start: range.start_date, end: range.end_date };
+                    }
+                }
+                
+                return null;
+            }
+            
+            function updateEndDateConstraints() {
+                if (!startDateInput.value) {
+                    endDateInput.disabled = true;
+                    return;
+                }
+                
+                const range = findDateRange(startDateInput.value);
+                if (range) {
+                    endDateInput.disabled = false;
+                    endDateInput.min = startDateInput.value;
+                    endDateInput.max = range.end;
+                    
+                    // Update the help text
+                    document.getElementById('end-date-help').textContent = 
+                        `Please select an end date (until ${new Date(range.end).toLocaleDateString()})`;
+                } else {
+                    endDateInput.disabled = true;
+                }
+            }
 
             function updatePriceCalculation() {
                 const startDate = new Date(startDateInput.value);
@@ -135,28 +226,84 @@
                     totalPrice.textContent = '€' + price.toFixed(2);
 
                     priceCalculation.classList.remove('hidden');
+                    availabilityWarning.classList.remove('hidden');
+                    bookButton.disabled = false;
                 } else {
                     priceCalculation.classList.add('hidden');
+                    availabilityWarning.classList.add('hidden');
+                    bookButton.disabled = true;
                 }
             }
-
+            
+            // Create a date disabler for flatpickr
+            function disableUnavailableDates(date) {
+                const dateStr = date.toISOString().split('T')[0];
+                return !isDateInAvailableRange(dateStr);
+            }
+            
+            // Update the validity of the start date
             startDateInput.addEventListener('change', function() {
-                // Set the minimum end date to be the start date
-                endDateInput.min = startDateInput.value;
-
-                // If the end date is before the start date, update it
-                if (endDateInput.value && new Date(endDateInput.value) < new Date(startDateInput.value)) {
-                    endDateInput.value = startDateInput.value;
+                const isAvailable = isDateInAvailableRange(startDateInput.value);
+                
+                if (!isAvailable) {
+                    startDateInput.setCustomValidity("This date is not available");
+                    document.getElementById('start-date-help').textContent = "Please select an available date";
+                    document.getElementById('start-date-help').classList.add('text-red-500');
+                    document.getElementById('start-date-help').classList.remove('text-gray-500');
+                } else {
+                    startDateInput.setCustomValidity("");
+                    document.getElementById('start-date-help').textContent = "Date is available";
+                    document.getElementById('start-date-help').classList.add('text-green-500');
+                    document.getElementById('start-date-help').classList.remove('text-red-500', 'text-gray-500');
+                    
+                    // Reset end date when start date changes
+                    endDateInput.value = '';
                 }
-
+                
+                updateEndDateConstraints();
                 updatePriceCalculation();
             });
 
-            endDateInput.addEventListener('change', updatePriceCalculation);
+            endDateInput.addEventListener('change', function() {
+                if (startDateInput.value && endDateInput.value) {
+                    const startRange = findDateRange(startDateInput.value);
+                    const endRange = findDateRange(endDateInput.value);
+                    
+                    // Verify both dates are in the same range
+                    if (startRange && endRange && 
+                        startRange.start === endRange.start && 
+                        startRange.end === endRange.end) {
+                        endDateInput.setCustomValidity("");
+                        document.getElementById('end-date-help').classList.add('text-green-500');
+                        document.getElementById('end-date-help').classList.remove('text-red-500', 'text-gray-500');
+                    } else {
+                        endDateInput.setCustomValidity("End date must be in the same availability range");
+                        document.getElementById('end-date-help').textContent = "End date must be in the same availability range";
+                        document.getElementById('end-date-help').classList.add('text-red-500');
+                        document.getElementById('end-date-help').classList.remove('text-green-500', 'text-gray-500');
+                    }
+                }
+                
+                updatePriceCalculation();
+            });
 
+            // Initialize with end date disabled
+            endDateInput.disabled = true;
+            
             // Initial calculation on page load
             if (startDateInput.value && endDateInput.value) {
+                updateEndDateConstraints();
                 updatePriceCalculation();
+            }
+            
+            // Helper function to format a date
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
             }
         });
     </script>

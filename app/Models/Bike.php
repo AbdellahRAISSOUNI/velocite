@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Services\BikeAvailabilityService;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class Bike extends Model
 {
@@ -169,5 +172,29 @@ class Bike extends Model
     public function getAverageRatingAttribute()
     {
         return $this->ratings()->avg('rating') ?? 0;
+    }
+
+    /**
+     * Set the availability range for this bike
+     */
+    public function setAvailabilityRange(Carbon $startDate, Carbon $endDate): void
+    {
+        app(BikeAvailabilityService::class)->setAvailabilityRange($this, $startDate, $endDate);
+    }
+
+    /**
+     * Check if a date range is available for this bike
+     */
+    public function isDateRangeAvailable(Carbon $startDate, Carbon $endDate): bool
+    {
+        return app(BikeAvailabilityService::class)->isDateRangeAvailable($this, $startDate, $endDate);
+    }
+
+    /**
+     * Get available date ranges for this bike
+     */
+    public function getAvailableDateRanges(): Collection
+    {
+        return app(BikeAvailabilityService::class)->getAvailableDateRanges($this);
     }
 }

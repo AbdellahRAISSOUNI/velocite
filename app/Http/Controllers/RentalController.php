@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Services\NotificationService;
-
+use App\Services\BikeAvailabilityService;
 class RentalController extends Controller
 {
     protected $notificationService;
@@ -58,7 +58,17 @@ class RentalController extends Controller
             return redirect()->route('bikes.show', $bike->id)->with('error', 'This bike is not available for rent');
         }
 
-        return view('rentals.create', compact('bike', 'startDate', 'endDate'));
+        // Get available dates for the next 60 days
+        $availableDates = $bike->availabilities()
+            ->where('date', '>=', now())
+            ->where('date', '<=', now()->addDays(60))
+            ->where('is_available', true)
+            ->whereNull('temporary_hold_rental_id')
+            ->pluck('date')
+            ->map->format('Y-m-d')
+            ->toArray();
+
+        return view('rentals.create', compact('bike', 'startDate', 'endDate', 'availableDates'));
     }
 
     /**
@@ -83,7 +93,8 @@ class RentalController extends Controller
         }
 
         // Check if there are any conflicting rentals
-        if (!$this->checkAvailability($bike->id, $startDate, $endDate)) {
+        $availabilityService = app(BikeAvailabilityService::class);
+        if ($availabilityService->hasConflicts($bike, $startDate, $endDate)) {
             return back()->with('error', 'The bike is not available for the selected dates');
         }
 

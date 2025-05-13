@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Services\BikeAvailabilityService;
+use Carbon\Carbon;
 
 class Rental extends Model
 {
@@ -45,6 +47,32 @@ class Rental extends Model
         'is_deposit_returned' => 'boolean',
         'cancelled_at' => 'datetime',
     ];
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted()
+    {
+        static::creating(function ($rental) {
+            // Hold the dates when creating a rental request
+            app(BikeAvailabilityService::class)->holdDatesForRental($rental);
+        });
+
+        static::updating(function ($rental) {
+            // Handle status changes
+            if ($rental->isDirty('status')) {
+                $availabilityService = app(BikeAvailabilityService::class);
+
+                if ($rental->status === 'accepted') {
+                    // Make dates permanently unavailable when accepted
+                    $availabilityService->makeDatesUnavailable($rental);
+                } elseif ($rental->status === 'rejected' || $rental->status === 'cancelled') {
+                    // Release the hold when rejected or cancelled
+                    $availabilityService->releaseTemporaryHolds($rental);
+                }
+            }
+        });
+    }
 
     /**
      * Get the bike for this rental.
