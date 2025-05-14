@@ -4,7 +4,7 @@
         <p class="mt-2 text-sm text-gray-600">Create an account to start renting bikes</p>
     </div>
 
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
         @csrf
 
         <!-- Name -->
@@ -19,6 +19,29 @@
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <!-- CIN -->
+        <div class="mt-4">
+            <x-input-label for="cin" :value="__('CIN (Carte d\'Identité Nationale)')" />
+            <x-text-input id="cin" class="block mt-1 w-full" type="text" name="cin" :value="old('cin')" required />
+            <x-input-error :messages="$errors->get('cin')" class="mt-2" />
+        </div>
+
+        <!-- CIN Front Image -->
+        <div class="mt-4">
+            <x-input-label for="cin_front" :value="__('CIN Front Side (Image)')" />
+            <input id="cin_front" class="block mt-1 w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" type="file" name="cin_front" accept="image/jpeg,image/png,image/jpg" required />
+            <p class="mt-1 text-xs text-gray-500">Upload JPEG or PNG image (max 2MB)</p>
+            <x-input-error :messages="$errors->get('cin_front')" class="mt-2" />
+        </div>
+
+        <!-- CIN Back Image -->
+        <div class="mt-4">
+            <x-input-label for="cin_back" :value="__('CIN Back Side (Image)')" />
+            <input id="cin_back" class="block mt-1 w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" type="file" name="cin_back" accept="image/jpeg,image/png,image/jpg" required />
+            <p class="mt-1 text-xs text-gray-500">Upload JPEG or PNG image (max 2MB)</p>
+            <x-input-error :messages="$errors->get('cin_back')" class="mt-2" />
         </div>
 
         <!-- City -->

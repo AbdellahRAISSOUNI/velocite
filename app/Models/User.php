@@ -26,6 +26,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'cin',
+        'cin_front',
+        'cin_back',
     ];
 
     /**
@@ -177,5 +180,25 @@ class User extends Authenticatable
         return $this->profile && $this->profile->profile_picture
             ? asset('storage/' . $this->profile->profile_picture)
             : asset('img/default-profile.jpg');
+    }
+    
+    /**
+     * Get the user's CIN front image URL.
+     */
+    public function getCinFrontUrlAttribute()
+    {
+        return $this->cin_front
+            ? asset('storage/' . $this->cin_front)
+            : null;
+    }
+    
+    /**
+     * Get the user's CIN back image URL.
+     */
+    public function getCinBackUrlAttribute()
+    {
+        return $this->cin_back
+            ? asset('storage/' . $this->cin_back)
+            : null;
     }
 }
