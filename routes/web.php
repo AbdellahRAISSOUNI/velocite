@@ -144,7 +144,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 // Client rental routes
 Route::middleware(['auth', 'role:client'])->group(function () {
     // Rental management
-    Route::get('/rentals', [RentalController::class, 'index'])->name('rentals.index');
+    Route::resource('rentals', RentalController::class);
+    Route::get('rentals/{id}/invoice', [App\Http\Controllers\RentalController::class, 'invoice'])->name('rentals.invoice');
     Route::get('/rentals/create', [RentalController::class, 'create'])->name('rentals.create');
     Route::post('/rentals', [RentalController::class, 'store'])->name('rentals.store');
     Route::get('/rentals/{id}', [RentalController::class, 'show'])->name('rentals.show');

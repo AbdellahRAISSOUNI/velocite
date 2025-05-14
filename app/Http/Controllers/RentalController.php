@@ -58,16 +58,23 @@ class RentalController extends Controller
             return redirect()->route('bikes.show', $bike->id)->with('error', 'This bike is not available for rent');
         }
 
-        // Get available dates for the next 60 days
-        $availableDates = $bike->availabilities()
-            ->where('date', '>=', now())
-            ->where('date', '<=', now()->addDays(60))
-            ->where('is_available', true)
-            ->whereNull('temporary_hold_rental_id')
-            ->pluck('date')
-            ->map->format('Y-m-d')
-            ->toArray();
-
+        // Get available date ranges for the next 60 days
+        $availabilityService = app(BikeAvailabilityService::class);
+        $ranges = $availabilityService->getAvailableDateRanges($bike);
+        $availableDates = [];
+        $now = now();
+        $limit = now()->addDays(60);
+        foreach ($ranges as $range) {
+            $start = $range['start_date']->copy();
+            $end = $range['end_date']->copy();
+            // Limiter à la fenêtre demandée
+            if ($start < $now) $start = $now->copy();
+            if ($end > $limit) $end = $limit->copy();
+            while ($start <= $end) {
+                $availableDates[] = $start->format('Y-m-d');
+                $start->addDay();
+            }
+        }
         return view('rentals.create', compact('bike', 'startDate', 'endDate', 'availableDates'));
     }
 
@@ -144,6 +151,25 @@ class RentalController extends Controller
         }
 
         return view('rentals.show', compact('rental'));
+    }
+
+    /**
+     * Generate a PDF invoice for a rental
+     */
+    public function invoice(string $id)
+    {
+        $rental = Rental::with(['bike', 'bike.owner', 'bike.primaryImage', 'bike.category', 'renter'])->findOrFail($id);
+        if (Auth::id() !== $rental->renter_id && Auth::id() !== $rental->bike->owner_id) {
+            abort(403, 'Unauthorized action.');
+        }
+        $locationPrice = $rental->total_price;
+        $security = $rental->security_deposit;
+        $total = $locationPrice + $security;
+        $platform = $locationPrice * 0.10;
+        $owner = $locationPrice * 0.90;
+        $pdf = app('dompdf.wrapper');
+        $pdf->loadView('rentals.invoice', compact('rental', 'locationPrice', 'security', 'total', 'platform', 'owner'));
+        return $pdf->download('facture-location-'.$rental->id.'.pdf');
     }
 
     /**
@@ -241,35 +267,5 @@ class RentalController extends Controller
         }
     }
 
-    /**
-     * Check if a bike is available for the given dates.
-     */
-    private function checkAvailability($bikeId, $startDate, $endDate)
-    {
-        // Check if bike has any unavailable dates in the range
-        $unavailableDates = DB::table('bike_availabilities')
-            ->where('bike_id', $bikeId)
-            ->where('is_available', false)
-            ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-            ->exists();
 
-        if ($unavailableDates) {
-            return false;
-        }
-
-        // Check if there are any confirmed or ongoing rentals during the requested period
-        $conflictingRentals = Rental::where('bike_id', $bikeId)
-            ->whereIn('status', ['confirmed', 'ongoing'])
-            ->where(function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('start_date', [$startDate, $endDate])
-                    ->orWhereBetween('end_date', [$startDate, $endDate])
-                    ->orWhere(function ($query) use ($startDate, $endDate) {
-                        $query->where('start_date', '<=', $startDate)
-                              ->where('end_date', '>=', $endDate);
-                    });
-            })
-            ->exists();
-
-        return !$conflictingRentals;
-    }
 }

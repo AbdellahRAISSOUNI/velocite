@@ -14,6 +14,20 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            animation: {
+                'background-move': 'bgMove 10s ease-in-out infinite',
+                'background-move-alt': 'bgMoveAlt 15s ease-in-out infinite',
+            },
+            keyframes: {
+                bgMove: {
+                    '0%, 100%': { transform: 'translateY(0px) translateX(0px)' },
+                    '50%': { transform: 'translateY(-30px) translateX(30px)' },
+                },
+                bgMoveAlt: {
+                    '0%, 100%': { transform: 'translateY(0px) translateX(0px)' },
+                    '50%': { transform: 'translateY(20px) translateX(-20px)' },
+                },
+            },
         },
     },
 
