@@ -108,6 +108,51 @@ class ProfileController extends Controller
     }
 
     /**
+     * Update the user's CIN images.
+     */
+    public function updateCinImages(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'cin_front' => ['sometimes', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'cin_back' => ['sometimes', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+        ]);
+
+        $user = $request->user();
+        $updates = [];
+
+        // Process CIN front image if provided
+        if ($request->hasFile('cin_front')) {
+            // Delete old image if exists
+            if ($user->cin_front) {
+                Storage::disk('public')->delete($user->cin_front);
+            }
+            
+            // Store new image
+            $cinFrontPath = $request->file('cin_front')->store('cin', 'public');
+            $updates['cin_front'] = $cinFrontPath;
+        }
+
+        // Process CIN back image if provided
+        if ($request->hasFile('cin_back')) {
+            // Delete old image if exists
+            if ($user->cin_back) {
+                Storage::disk('public')->delete($user->cin_back);
+            }
+            
+            // Store new image
+            $cinBackPath = $request->file('cin_back')->store('cin', 'public');
+            $updates['cin_back'] = $cinBackPath;
+        }
+
+        // Update user with new image paths
+        if (!empty($updates)) {
+            $user->update($updates);
+        }
+
+        return Redirect::route('profile.edit')->with('status', 'cin-images-updated');
+    }
+
+    /**
      * Delete the user's account.
      */
     public function destroy(Request $request): RedirectResponse
@@ -121,6 +166,15 @@ class ProfileController extends Controller
         // Delete profile picture if exists
         if ($user->profile && $user->profile->profile_picture) {
             Storage::disk('public')->delete($user->profile->profile_picture);
+        }
+
+        // Delete CIN images if they exist
+        if ($user->cin_front) {
+            Storage::disk('public')->delete($user->cin_front);
+        }
+        
+        if ($user->cin_back) {
+            Storage::disk('public')->delete($user->cin_back);
         }
 
         Auth::logout();
