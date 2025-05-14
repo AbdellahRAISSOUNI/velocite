@@ -135,17 +135,17 @@
 
                 <div class="mt-6">
                     @auth
-                        @if(auth()->user()->hasRole('client'))
+                        @if((auth()->user()->hasRole('client') || auth()->user()->hasRole('partner')) && auth()->id() !== $bike->owner_id)
                             <a href="{{ route('rentals.create', ['bike_id' => $bike->id]) }}" class="block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg w-full">
                                 Request to Rent
                             </a>
-                        @elseif(auth()->user()->hasRole('partner') && auth()->id() === $bike->owner_id)
+                        @elseif(auth()->id() === $bike->owner_id)
                             <div class="text-center bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg w-full">
                                 You own this bike
                             </div>
                         @else
                             <div class="text-center bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg w-full">
-                                Only clients can rent bikes
+                                You cannot rent bikes with your current role
                             </div>
                         @endif
                     @else

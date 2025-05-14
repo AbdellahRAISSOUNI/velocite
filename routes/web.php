@@ -45,21 +45,10 @@ Route::get('/search/nearby', [SearchController::class, 'nearby'])->name('search.
 
 // Registration routes
 Route::middleware('guest')->group(function () {
-    // Client registration (par défaut)
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
-
-    // Route explicite pour client
-    Route::get('register/client', [RegisteredUserController::class, 'create'])
-        ->name('register.client');
-    // Partner registration
-    Route::get('register/partner', [\App\Http\Controllers\Auth\PartnerRegistrationController::class, 'create'])
-        ->name('register.partner');
-    Route::post('register/partner', [\App\Http\Controllers\Auth\PartnerRegistrationController::class, 'store']);
 });
-
-
 
 // Partner upgrade routes
 Route::middleware('auth', 'verified')->group(function () {
