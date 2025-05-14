@@ -21,6 +21,10 @@ class SearchController extends Controller
 
         // Apply filters from the request
         $bikes = $this->applyFilters($query, $request)
+                    ->where("is_available", true)
+                    ->whereDoesntHave('rentals', function($query) {
+                        $query->whereIn('status', ['confirmed', 'ongoing', 'pending']);
+                    })
                     ->paginate(12)
                     ->withQueryString();
 

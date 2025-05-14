@@ -142,7 +142,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 // Client rental routes
-Route::middleware(['auth', 'role:client'])->group(function () {
+Route::middleware(['auth', 'role:client,partner'])->group(function () {
     // Rental management
     Route::get('/rentals', [RentalController::class, 'index'])->name('rentals.index');
     Route::get('/rentals/create', [RentalController::class, 'create'])->name('rentals.create');
