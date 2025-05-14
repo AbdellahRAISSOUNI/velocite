@@ -1,5 +1,5 @@
 <x-app-layout>
-<style>
+    <style>
         .fade-in { animation: fadeIn 0.6s ease-in-out; }
         .slide-in { animation: slideIn 0.6s ease-in-out; }
         .hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
@@ -11,8 +11,51 @@
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
         .status-badge { transition: all 0.3s ease; }
         .status-badge:hover { transform: scale(1.1); }
+        .partner-banner { 
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            transition: all 0.3s ease;
+        }
+        .partner-banner:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.2);
+        }
+        .partner-btn {
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+        .partner-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
     </style>
     <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mb-6">
+            <div class="partner-banner rounded-lg shadow-md fade-in overflow-hidden">
+                <div class="p-6 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-white p-3 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Become a Partner and Start Earning</h3>
+                            <p class="text-green-50">
+                                Do you own bikes you'd like to rent out? Join our partner program and start making money today.
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="{{ route('become.partner') }}" class="partner-btn inline-flex items-center px-6 py-3 border border-transparent rounded-md font-semibold text-sm text-green-700 uppercase tracking-wider hover:text-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200">
+                            <span>Become a Partner</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">

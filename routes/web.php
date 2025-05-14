@@ -10,8 +10,8 @@ use App\Http\Controllers\BikeController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\PartnerRentalController;
-use App\Http\Controllers\Auth\ClientRegistrationController;
-use App\Http\Controllers\Auth\PartnerRegistrationController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\PartnerUpgradeController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\AgentController;
@@ -43,21 +43,20 @@ Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 Route::get('/search/map', [SearchController::class, 'map'])->name('search.map');
 Route::get('/search/nearby', [SearchController::class, 'nearby'])->name('search.nearby');
 
-// Role-specific registration routes
-Route::get('/register/client', [ClientRegistrationController::class, 'create'])
-    ->middleware('guest')
-    ->name('register.client');
+// Registration routes
+Route::middleware('guest')->group(function () {
+    Route::get('register', [RegisteredUserController::class, 'create'])
+        ->name('register');
+    Route::post('register', [RegisteredUserController::class, 'store']);
+});
 
-Route::post('/register/client', [ClientRegistrationController::class, 'store'])
-    ->middleware('guest');
-
-Route::get('/register/partner', [PartnerRegistrationController::class, 'create'])
-    ->middleware('guest')
-    ->name('register.partner');
-
-Route::post('/register/partner', [PartnerRegistrationController::class, 'store'])
-    ->middleware('guest');
-
+// Partner upgrade routes
+Route::middleware('auth', 'verified')->group(function () {
+    Route::get('/become-partner', [PartnerUpgradeController::class, 'showTerms'])
+        ->name('become.partner');
+    Route::post('/become-partner/accept', [PartnerUpgradeController::class, 'acceptTerms'])
+        ->name('become.partner.accept');
+});
 // Role-specific dashboard routes
 Route::get('/dashboard', function () {
     // Redirect based on user role
