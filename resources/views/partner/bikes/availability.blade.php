@@ -17,7 +17,7 @@
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Instructions</h3>
                     <p class="text-gray-600 mb-4">Use the calendar below to manage when your bike is available for rent:</p>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="flex items-center space-x-2">
                             <div class="w-4 h-4 bg-green-100 border border-green-400 rounded"></div>
                             <span class="text-sm">Available dates</span>
@@ -30,13 +30,18 @@
                             <div class="w-4 h-4 bg-blue-100 border border-blue-400 rounded"></div>
                             <span class="text-sm">Booked dates (cannot be changed)</span>
                         </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-4 h-4 bg-yellow-100 border border-yellow-400 rounded"></div>
+                            <span class="text-sm">Pending requests</span>
+                        </div>
                     </div>
 
                     <div class="mt-4 text-sm text-gray-600">
                         <ul class="list-disc list-inside">
                             <li>Click on a date to toggle its availability</li>
                             <li>Drag across multiple dates to update them all at once</li>
-                            <li>Dates with confirmed rentals cannot be marked as unavailable</li>
+                            <li>Dates with confirmed rentals or pending requests cannot be marked as unavailable</li>
+                            <li>Pending rental requests will be automatically resolved when you accept or reject them</li>
                         </ul>
                     </div>
                 </div>
@@ -93,9 +98,10 @@
                                                         :class="{
                                                             'h-16 w-16 mx-auto flex flex-col items-center justify-center cursor-pointer relative rounded-md': true,
                                                             'bg-gray-100 text-gray-400': !isCurrentMonth(day),
-                                                            'bg-green-100 border border-green-400': isAvailable(day) && isCurrentMonth(day) && !isBooked(day),
-                                                            'bg-red-100 border border-red-400': !isAvailable(day) && isCurrentMonth(day) && !isBooked(day),
+                                                            'bg-green-100 border border-green-400': isAvailable(day) && isCurrentMonth(day) && !isBooked(day) && !hasPendingRequest(day),
+                                                            'bg-red-100 border border-red-400': !isAvailable(day) && isCurrentMonth(day) && !isBooked(day) && !hasPendingRequest(day),
                                                             'bg-blue-100 border border-blue-400 cursor-not-allowed': isBooked(day),
+                                                            'bg-yellow-100 border border-yellow-400 cursor-not-allowed': hasPendingRequest(day),
                                                             'opacity-50': isPastDate(day)
                                                         }"
                                                         x-on:mousedown="startSelection(day)"
@@ -115,7 +121,11 @@
                                                             <span class="text-xs text-blue-800 mt-1">Booked</span>
                                                         </template>
 
-                                                        <template x-if="!isBooked(day) && isCurrentMonth(day) && !isPastDate(day)">
+                                                        <template x-if="hasPendingRequest(day) && isCurrentMonth(day)">
+                                                            <span class="text-xs text-yellow-800 mt-1">Pending</span>
+                                                        </template>
+
+                                                        <template x-if="!isBooked(day) && !hasPendingRequest(day) && isCurrentMonth(day) && !isPastDate(day)">
                                                             <span class="text-xs mt-1"
                                                                 :class="{
                                                                     'text-green-800': isAvailable(day),
@@ -227,12 +237,40 @@
                     return true; // Default to available if no record exists
                 },
 
+                hasPendingRequest(date) {
+                    if (!this.isCurrentMonth(date) || this.isPastDate(date)) {
+                        return false;
+                    }
+
+                    const formattedDate = this.formatDate(date);
+                    if (this.availabilityData[formattedDate] && this.availabilityData[formattedDate].temporary_hold_rental_id) {
+                        return true;
+                    }
+
+                    // Check for pending rentals
+                    return this.rentalData.some(rental => {
+                        if (rental.status !== 'pending') return false;
+                        
+                        const startDate = new Date(rental.start_date);
+                        const endDate = new Date(rental.end_date);
+
+                        // Reset time part for comparison
+                        date.setHours(0, 0, 0, 0);
+                        startDate.setHours(0, 0, 0, 0);
+                        endDate.setHours(0, 0, 0, 0);
+
+                        return date >= startDate && date <= endDate;
+                    });
+                },
+
                 isBooked(date) {
                     if (!this.isCurrentMonth(date) || this.isPastDate(date)) {
                         return false;
                     }
 
                     return this.rentalData.some(rental => {
+                        if (!['confirmed', 'ongoing'].includes(rental.status)) return false;
+                        
                         const startDate = new Date(rental.start_date);
                         const endDate = new Date(rental.end_date);
 
@@ -279,7 +317,7 @@
                 },
 
                 startSelection(date) {
-                    if (!this.isCurrentMonth(date) || this.isPastDate(date) || this.isBooked(date)) {
+                    if (!this.isCurrentMonth(date) || this.isPastDate(date) || this.isBooked(date) || this.hasPendingRequest(date)) {
                         return;
                     }
 
@@ -290,7 +328,7 @@
                 },
 
                 updateSelection(date) {
-                    if (!this.isSelecting || !this.isCurrentMonth(date) || this.isPastDate(date) || this.isBooked(date)) {
+                    if (!this.isSelecting || !this.isCurrentMonth(date) || this.isPastDate(date) || this.isBooked(date) || this.hasPendingRequest(date)) {
                         return;
                     }
 
@@ -341,14 +379,19 @@
                 async updateAvailability(dates, isAvailable) {
                     if (dates.length === 0) return;
 
-                    // Check if any booked dates are in the selection
+                    // Check if any booked dates or dates with pending requests are in the selection
                     const hasBookedDates = dates.some(dateStr => {
                         const date = new Date(dateStr);
                         return this.isBooked(date);
                     });
 
-                    if (hasBookedDates && !isAvailable) {
-                        this.statusMessage = 'Cannot mark booked dates as unavailable.';
+                    const hasPendingDates = dates.some(dateStr => {
+                        const date = new Date(dateStr);
+                        return this.hasPendingRequest(date);
+                    });
+
+                    if ((hasBookedDates || hasPendingDates) && !isAvailable) {
+                        this.statusMessage = 'Cannot mark booked dates or dates with pending requests as unavailable.';
                         this.statusType = 'error';
                         setTimeout(() => {
                             this.statusMessage = '';
@@ -375,7 +418,11 @@
                             // Update local data
                             dates.forEach(dateStr => {
                                 if (!this.availabilityData[dateStr]) {
-                                    this.availabilityData[dateStr] = { bike_id: {{ $bike->id }}, date: dateStr };
+                                    this.availabilityData[dateStr] = { 
+                                        bike_id: "{{ $bike->id }}", 
+                                        date: dateStr,
+                                        temporary_hold_rental_id: null 
+                                    };
                                 }
                                 this.availabilityData[dateStr].is_available = isAvailable;
                             });
@@ -406,7 +453,7 @@
 
                     for (let d = new Date(firstDayOfMonth); d <= lastDayOfMonth; d.setDate(d.getDate() + 1)) {
                         const date = new Date(d);
-                        if (!this.isPastDate(date) && !this.isBooked(date)) {
+                        if (!this.isPastDate(date) && !this.isBooked(date) && !this.hasPendingRequest(date)) {
                             dates.push(this.formatDate(date));
                         }
                     }

@@ -6,6 +6,7 @@ use App\Models\Bike;
 use App\Models\BikeCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class SearchController extends Controller
 {
@@ -99,10 +100,10 @@ class SearchController extends Controller
      */
     private function applyFilters($query, Request $request)
     {
-        // Filter by search term
-        if ($request->has('q') && !empty($request->q)) {
-            $searchTerm = $request->q;
-            $query->where(function ($q) use ($searchTerm) {
+        // Search term
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
                 $q->where('title', 'like', "%{$searchTerm}%")
                   ->orWhere('description', 'like', "%{$searchTerm}%")
                   ->orWhere('brand', 'like', "%{$searchTerm}%")
@@ -110,62 +111,57 @@ class SearchController extends Controller
             });
         }
 
-        // Filter by location
-        if ($request->has('location') && !empty($request->location)) {
-            $query->where('location', 'like', "%{$request->location}%");
+        // Location
+        if ($request->filled('location')) {
+            $query->where('location', $request->location);
         }
 
-        // Filter by category
-        if ($request->has('category_id') && !empty($request->category_id)) {
-            $query->where('category_id', $request->category_id);
+        // Category
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
         }
 
-        // Filter by price range
-        if ($request->has('min_price') && is_numeric($request->min_price)) {
+        // Price range
+        if ($request->filled('min_price')) {
             $query->where('daily_rate', '>=', $request->min_price);
         }
-
-        if ($request->has('max_price') && is_numeric($request->max_price)) {
+        if ($request->filled('max_price')) {
             $query->where('daily_rate', '<=', $request->max_price);
         }
 
-        // Filter by electric bikes
-        if ($request->has('is_electric') && $request->is_electric == 1) {
+        // Electric bikes
+        if ($request->filled('electric')) {
             $query->where('is_electric', true);
         }
 
-        // Filter by rating
-        if ($request->has('min_rating') && is_numeric($request->min_rating)) {
+        // Rating
+        if ($request->filled('min_rating')) {
             $query->where('average_rating', '>=', $request->min_rating);
         }
 
-        // Filter by date availability
-        if ($request->has('start_date') && $request->has('end_date')) {
-            $startDate = $request->start_date;
-            $endDate = $request->end_date;
+        // Date availability
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $startDate = Carbon::parse($request->start_date);
+            $endDate = Carbon::parse($request->end_date);
 
-            // Exclude bikes with unavailable dates in the selected range
-            $query->whereDoesntHave('availabilities', function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('date', [$startDate, $endDate])
-                  ->where('is_available', false);
-            });
-
-            // Exclude bikes with confirmed rentals in the selected range
-            $query->whereDoesntHave('rentals', function ($q) use ($startDate, $endDate) {
+            $query->whereDoesntHave('availabilities', function($q) use ($startDate, $endDate) {
+                $q->where('is_available', false)
+                  ->whereBetween('date', [$startDate, $endDate]);
+            })->whereDoesntHave('rentals', function($q) use ($startDate, $endDate) {
                 $q->whereIn('status', ['confirmed', 'ongoing'])
-                  ->where(function ($q) use ($startDate, $endDate) {
-                      $q->whereBetween('start_date', [$startDate, $endDate])
-                        ->orWhereBetween('end_date', [$startDate, $endDate])
-                        ->orWhere(function ($q) use ($startDate, $endDate) {
-                            $q->where('start_date', '<=', $startDate)
-                              ->where('end_date', '>=', $endDate);
-                        });
+                  ->where(function($query) use ($startDate, $endDate) {
+                      $query->whereBetween('start_date', [$startDate, $endDate])
+                            ->orWhereBetween('end_date', [$startDate, $endDate])
+                            ->orWhere(function($q) use ($startDate, $endDate) {
+                                $q->where('start_date', '<=', $startDate)
+                                  ->where('end_date', '>=', $endDate);
+                            });
                   });
             });
         }
 
-        // Apply sorting
-        if ($request->has('sort_by')) {
+        // Sort by
+        if ($request->filled('sort_by')) {
             switch ($request->sort_by) {
                 case 'price_asc':
                     $query->orderBy('daily_rate', 'asc');
@@ -173,19 +169,14 @@ class SearchController extends Controller
                 case 'price_desc':
                     $query->orderBy('daily_rate', 'desc');
                     break;
-                case 'rating_desc':
+                case 'rating':
                     $query->orderBy('average_rating', 'desc');
                     break;
-                case 'newest':
-                    $query->orderBy('created_at', 'desc');
-                    break;
                 default:
-                    $query->orderBy('created_at', 'desc');
-                    break;
+                    $query->latest();
             }
         } else {
-            // Default sort is newest
-            $query->orderBy('created_at', 'desc');
+            $query->latest();
         }
 
         return $query;

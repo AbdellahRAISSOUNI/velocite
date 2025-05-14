@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Bike;
 use App\Models\BikeCategory;
 use App\Models\BikeImage;
-use App\Models\BikeAvailability;
 use App\Models\PremiumListing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -335,92 +334,6 @@ class BikeController extends Controller
 
         return back()->with('success', "Bike listing has been $status.");
     }
-
-    /**
-     * Show the form for managing bike availability calendar.
-     */
-    public function manageAvailability(Bike $bike)
-    {
-        $startDate = now()->startOfMonth();
-        $endDate = now()->addMonths(3)->endOfMonth();
-
-        // Get all availability entries for the 3-month period
-        $availabilities = BikeAvailability::where('bike_id', $bike->id)
-            ->whereBetween('date', [$startDate, $endDate])
-            ->get()
-            ->keyBy(function($item) {
-                return $item->date->format('Y-m-d');
-            });
-
-        // Get all confirmed rentals that overlap with this period
-        $rentals = $bike->rentals()
-            ->whereIn('status', ['confirmed', 'ongoing'])
-            ->where(function($query) use ($startDate, $endDate) {
-                $query->whereBetween('start_date', [$startDate, $endDate])
-                    ->orWhereBetween('end_date', [$startDate, $endDate])
-                    ->orWhere(function($q) use ($startDate, $endDate) {
-                        $q->where('start_date', '<', $startDate)
-                          ->where('end_date', '>', $endDate);
-                    });
-            })
-            ->get();
-
-        return view('partner.bikes.availability', compact('bike', 'availabilities', 'rentals', 'startDate', 'endDate'));
-    }
-
-    /**
-     * Update the availability for specific dates.
-     */
-    public function updateAvailability(Request $request, Bike $bike)
-    {
-        $validated = $request->validate([
-            'dates' => 'required|array',
-            'dates.*' => 'date',
-            'is_available' => 'required|boolean',
-        ]);
-
-        $dates = $validated['dates'];
-        $isAvailable = $validated['is_available'];
-
-        // Check if these dates have confirmed rentals
-        if (!$isAvailable) {
-            $conflictingRentals = $bike->rentals()
-                ->whereIn('status', ['confirmed', 'ongoing'])
-                ->where(function($query) use ($dates) {
-                    foreach ($dates as $date) {
-                        $dateObj = Carbon::parse($date);
-                        $query->orWhereBetween('start_date', [$dateObj->startOfDay(), $dateObj->copy()->endOfDay()])
-                              ->orWhereBetween('end_date', [$dateObj->startOfDay(), $dateObj->copy()->endOfDay()])
-                              ->orWhere(function($q) use ($dateObj) {
-                                  $q->where('start_date', '<', $dateObj->startOfDay())
-                                    ->where('end_date', '>', $dateObj->endOfDay());
-                              });
-                    }
-                })
-                ->count();
-
-            if ($conflictingRentals > 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cannot mark these dates as unavailable as there are confirmed rentals during this period.'
-                ], 422);
-            }
-        }
-
-        // Update or create availability records
-        foreach ($dates as $date) {
-            BikeAvailability::updateOrCreate(
-                ['bike_id' => $bike->id, 'date' => $date],
-                ['is_available' => $isAvailable]
-            );
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Availability updated successfully.'
-        ]);
-    }
-
     /**
      * Show the form for creating a premium listing.
      */

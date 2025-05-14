@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-2xl font-semibold text-gray-900">Rate the Renter</h1>
-                <p class="text-sm text-gray-600">Rental #{{ $rental->id }} - {{ $rental->user->name }}</p>
+                <p class="text-sm text-gray-600">Rental #{{ $rental->id }} - {{ $rental->renter->name }}</p>
             </div>
             <a href="{{ route('partner.rentals.show', $rental->id) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">

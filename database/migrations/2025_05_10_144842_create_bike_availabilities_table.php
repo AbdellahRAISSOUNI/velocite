@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('bike_id')->constrained()->onDelete('cascade');
             $table->date('date');
             $table->boolean('is_available')->default(true);
+            $table->foreignId('temporary_hold_rental_id')->nullable()->constrained('rentals')->onDelete('set null');
             $table->timestamps();
 
             // Each date should be unique per bike
