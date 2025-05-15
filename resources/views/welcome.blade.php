@@ -129,7 +129,7 @@
                                 <a href="{{ route('bikes.show', $bike->id) }}" class="block">
                                     <div class="h-56 bg-gray-100 relative">
                                         @if($bike->primaryImage)
-                                            <img src="{{ asset('storage/bikes/placeholder.jpg') }}"
+                                            <img src="{{ asset('storage/' . $bike->primaryImage->image_path) }}"
                                                 alt="{{ $bike->title }}"
                                                 class="w-full h-full object-cover">
                                         @else
@@ -177,7 +177,7 @@
                                 <a href="{{ route('bikes.show', $bike->id) }}" class="block">
                                     <div class="h-56 bg-gray-100 relative">
                                         @if($bike->primaryImage)
-                                            <img src="{{ asset('storage/bikes/placeholder.jpg') }}"
+                                            <img src="{{ asset('storage/' . $bike->primaryImage->image_path) }}"
                                                 alt="{{ $bike->title }}"
                                                 class="w-full h-full object-cover">
                                         @else
