@@ -21,6 +21,10 @@ class SearchController extends Controller
 
         // Apply filters from the request
         $bikes = $this->applyFilters($query, $request)
+                    ->where("is_available", true)
+                    ->whereDoesntHave('rentals', function($query) {
+                        $query->whereIn('status', ['confirmed', 'ongoing', 'pending']);
+                    })
                     ->paginate(12)
                     ->withQueryString();
 
@@ -100,9 +104,9 @@ class SearchController extends Controller
      */
     private function applyFilters($query, Request $request)
     {
-        // Search term
-        if ($request->filled('search')) {
-            $searchTerm = $request->search;
+        // Search term - updated to use 'q' parameter
+        if ($request->filled('q')) {
+            $searchTerm = $request->q;
             $query->where(function($q) use ($searchTerm) {
                 $q->where('title', 'like', "%{$searchTerm}%")
                   ->orWhere('description', 'like', "%{$searchTerm}%")
@@ -116,9 +120,9 @@ class SearchController extends Controller
             $query->where('location', $request->location);
         }
 
-        // Category
-        if ($request->filled('category')) {
-            $query->where('category_id', $request->category);
+        // Category - updated to use 'category_id' parameter
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
         }
 
         // Price range
@@ -129,8 +133,8 @@ class SearchController extends Controller
             $query->where('daily_rate', '<=', $request->max_price);
         }
 
-        // Electric bikes
-        if ($request->filled('electric')) {
+        // Electric bikes - updated to check for 'is_electric' parameter
+        if ($request->filled('is_electric')) {
             $query->where('is_electric', true);
         }
 
@@ -160,7 +164,7 @@ class SearchController extends Controller
             });
         }
 
-        // Sort by
+        // Sort by - fixed to match the sorting options from the views
         if ($request->filled('sort_by')) {
             switch ($request->sort_by) {
                 case 'price_asc':
@@ -169,8 +173,11 @@ class SearchController extends Controller
                 case 'price_desc':
                     $query->orderBy('daily_rate', 'desc');
                     break;
-                case 'rating':
+                case 'rating_desc': // Updated from 'rating' to 'rating_desc'
                     $query->orderBy('average_rating', 'desc');
+                    break;
+                case 'newest':
+                    $query->latest();
                     break;
                 default:
                     $query->latest();

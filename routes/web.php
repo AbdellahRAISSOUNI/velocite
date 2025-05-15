@@ -142,7 +142,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 // Client rental routes
-Route::middleware(['auth', 'role:client'])->group(function () {
+Route::middleware(['auth', 'role:client,partner'])->group(function () {
     // Rental management
     Route::resource('rentals', RentalController::class);
     Route::get('rentals/{id}/invoice', [App\Http\Controllers\RentalController::class, 'invoice'])->name('rentals.invoice');
@@ -220,7 +220,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/profile/picture', [ProfileController::class, 'updateProfilePicture'])->name('profile.picture.update');
-
+    Route::post('/profile/cin', [ProfileController::class, 'updateCinImages'])->name('profile.cin.update');
     // Notification routes
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/latest', [NotificationController::class, 'getLatest'])->name('notifications.latest');

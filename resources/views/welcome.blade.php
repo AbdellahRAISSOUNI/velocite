@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Vélocité - Bike Rental Platform</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
         <!-- Ajout de la police Google Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     </head>
@@ -31,6 +32,25 @@
                                     <a href="{{ route('register') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors duration-300 shadow-sm font-medium">
                                         Register
                                     </a>
+
+    </head>
+    <body class="antialiased bg-gray-50">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex justify-between items-center">
+                    <a href="{{ route('home') }}" class="text-2xl font-bold text-indigo-600">Vélocité</a>
+
+                    <div class="flex space-x-6">
+            @if (Route::has('login'))
+                    @auth
+                                <a href="{{ url('/dashboard') }}" class="text-gray-600 hover:text-indigo-500 transition-colors">Dashboard</a>
+                    @else
+                                <a href="{{ route('login') }}" class="text-gray-600 hover:text-indigo-500 transition-colors">Log in</a>
+
+                        @if (Route::has('register'))
+                                    <a href="{{ route('register') }}" class="text-gray-600 hover:text-indigo-500 transition-colors">Register</a>
+
                                 @endif
                             @endauth
                         @endif
@@ -38,6 +58,7 @@
                 </div>
             </div>
         </header>
+
 
         <!-- Hero Section avec animation -->
         <section class="bg-gradient-to-r from-indigo-50 via-blue-100 to-purple-50 py-20 relative overflow-hidden">
@@ -50,13 +71,27 @@
                     <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl font-serif">
                         <span class="block">Rent a Bike with</span>
                         <span class="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600 animate-gradient-x">Vélocité</span>
+
+        <!-- Hero Section with Search -->
+        <section class="bg-gradient-to-r from-indigo-50 to-blue-50 py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                        <span class="block">Rent a Bike with</span>
+                        <span class="block text-indigo-600">Vélocité</span>
+
                     </h1>
                     <p class="mt-4 max-w-md mx-auto text-lg text-gray-600 sm:text-xl md:mt-6 md:max-w-3xl">
                         Explore the city on two wheels. Find the perfect bike for your needs, whether it's for commuting, exercise, or adventure.
                     </p>
 
+
                     <!-- Search Form amélioré -->
                     <div class="mt-12 max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+
+                    <!-- Search Form -->
+                    <div class="mt-12 max-w-2xl mx-auto">
+
                         <form action="{{ route('search.index') }}" method="GET" class="space-y-4 sm:space-y-0 sm:flex sm:gap-4">
                             <div class="flex-1">
                                 <label for="q" class="sr-only">Search bikes</label>
@@ -66,13 +101,21 @@
                                             <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
                                         </svg>
                                     </div>
+
                                     <input type="text" name="q" id="q" class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150" placeholder="Find bikes by name, type, or location...">
+
+                                    <input type="text" name="q" id="q" class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Find bikes by name, type, or location...">
+
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
+
                                     <select name="category_id" class="block w-full py-3 pl-3 pr-10 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md transition duration-150">
+
+                                    <select name="category_id" class="block w-full py-3 pl-3 pr-10 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+
                                         <option value="">All Categories</option>
                                         @foreach($categories as $category)
                                             <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -80,7 +123,11 @@
                                     </select>
                                 </div>
                                 <div>
+
                                     <select name="location" class="block w-full py-3 pl-3 pr-10 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md transition duration-150">
+
+                                    <select name="location" class="block w-full py-3 pl-3 pr-10 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+
                                         <option value="">All Locations</option>
                                         @foreach($popularLocations as $location)
                                             <option value="{{ $location }}">{{ $location }}</option>
@@ -89,12 +136,17 @@
                                 </div>
                             </div>
 
+
                             <button type="submit" class="w-full sm:w-auto px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm transition-all duration-300 transform hover:scale-105">
+
+                            <button type="submit" class="w-full sm:w-auto px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm">
+
                                 Search
                             </button>
                         </form>
 
                         <div class="mt-6 text-sm text-gray-600 flex justify-center space-x-6">
+
                             <a href="{{ route('search.index') }}" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center transition-colors duration-300">
                                 Advanced Search
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,6 +154,12 @@
                                 </svg>
                             </a>
                             <a href="{{ route('search.map') }}" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center transition-colors duration-300">
+
+                            <a href="{{ route('search.index') }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                Advanced Search
+                            </a>
+                            <a href="{{ route('search.map') }}" class="text-indigo-600 hover:text-indigo-800 font-medium">
+
                                 Map View
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -113,6 +171,7 @@
                 </div>
             </div>
         </section>
+
 
         <!-- Categories Section avec hover effect amélioré -->
         <section class="py-16 bg-white">
@@ -180,30 +239,82 @@
                                                      alt="No image available"
                                                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                             @endif
+
+        <!-- Categories Section -->
+        <section class="py-16 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-10 text-center">Bike Categories</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                    @foreach($categories as $category)
+                        <a href="{{ route('search.index', ['category_id' => $category->id]) }}" class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-300 border border-gray-100">
+                            <div class="h-14 w-14 bg-indigo-50 rounded-full flex items-center justify-center mb-5 mx-auto">
+                                @if($category->icon)
+                                    <img src="{{ asset('storage/' . $category->icon) }}" alt="{{ $category->name }}" class="h-7 w-7">
+                                @else
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                                    </svg>
+                                @endif
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 text-center">{{ $category->name }}</h3>
+                            <p class="text-gray-500 mt-3 text-center">{{ Str::limit($category->description, 100) }}</p>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Bikes Section -->
+        @if(isset($featuredBikes) && $featuredBikes->count() > 0)
+            <section class="py-16 bg-gray-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-10 text-center">Featured Bikes</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        @foreach($featuredBikes as $bike)
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-100">
+                                <a href="{{ route('bikes.show', $bike->id) }}" class="block">
+                                    <div class="h-56 bg-gray-100 relative">
+                                        @if($bike->primaryImage)
+                                            <img src="{{ asset('storage/bikes/placeholder.jpg') }}"
+                                                alt="{{ $bike->title }}"
+                                                class="w-full h-full object-cover">
+
                                         @else
                                             <div class="w-full h-full flex items-center justify-center bg-gray-200">
                                                 <span class="text-gray-500">No image available</span>
                                             </div>
                                         @endif
+
                                         <div class="absolute top-3 right-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-1 px-3 text-xs font-semibold rounded-full shadow-sm">
+
+                                        <div class="absolute top-3 right-3 bg-indigo-600 text-white py-1 px-3 text-xs font-semibold rounded-full">
+
                                             Featured
                                         </div>
                                     </div>
                                 </a>
                                 <div class="p-5">
                                     <div class="flex justify-between items-start">
+
                                         <a href="{{ route('bikes.show', $bike->id) }}" class="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors duration-300">{{ $bike->title }}</a>
+
+                                        <a href="{{ route('bikes.show', $bike->id) }}" class="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors">{{ $bike->title }}</a>
+
                                         <span class="bg-indigo-100 text-indigo-800 text-xs px-2.5 py-0.5 rounded-full">{{ $bike->category->name }}</span>
                                     </div>
                                     <p class="text-gray-500 text-sm mt-3">{{ Str::limit($bike->description, 100) }}</p>
                                     <div class="flex justify-between items-center mt-5">
                                         <span class="text-indigo-600 font-semibold">€{{ number_format($bike->daily_rate, 2) }} <span class="text-gray-500 text-sm font-normal">/ day</span></span>
+
                                         <a href="{{ route('bikes.show', $bike->id) }}" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors duration-300 flex items-center">
                                             View Details
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                             </svg>
                                         </a>
+
+                                        <a href="{{ route('bikes.show', $bike->id) }}" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors">View Details →</a>
+
                                     </div>
                                 </div>
                             </div>
@@ -212,6 +323,7 @@
                 </div>
             </section>
         @endif
+
 
         <!-- All Bikes Section avec animation -->
         <section id="bikes" class="py-16 bg-white">
@@ -324,12 +436,112 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
+
+        <!-- All Bikes Section -->
+        <section id="bikes" class="py-16 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-10">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4 sm:mb-0">Available Bikes</h2>
+                    <a href="{{ route('search.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        View All Bikes
+                    </a>
+                </div>
+
+                @if(isset($bikes) && $bikes->count() > 0)
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        @foreach($bikes as $bike)
+                            <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 border border-gray-100">
+                                <a href="{{ route('bikes.show', $bike->id) }}" class="block">
+                                    <div class="h-56 bg-gray-100 relative">
+                                        @if($bike->primaryImage)
+                                            <img src="{{ asset('storage/bikes/placeholder.jpg') }}"
+                                                alt="{{ $bike->title }}"
+                                                class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                                                <span class="text-gray-500">No image available</span>
+                                            </div>
+                                        @endif
+                                        @if($bike->is_electric)
+                                            <div class="absolute top-3 right-3 bg-green-600 text-white py-1 px-2.5 text-xs font-semibold rounded-full">
+                                                Electric
+                                            </div>
+                                        @endif
+                                    </div>
+                                </a>
+                                <div class="p-5">
+                                    <div class="flex justify-between items-start">
+                                        <a href="{{ route('bikes.show', $bike->id) }}" class="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors">{{ $bike->title }}</a>
+                                        <span class="text-sm text-gray-500">{{ $bike->location }}</span>
+                                    </div>
+                                    <div class="flex items-center mt-3 space-x-2">
+                                        <div class="flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                            <span class="text-sm text-gray-600 ml-1">
+                                                {{ number_format($bike->average_rating, 1) }} ({{ $bike->rating_count }})
+                                            </span>
+                                        </div>
+                                        <span class="text-gray-300">|</span>
+                                        <span class="text-sm text-gray-600">{{ $bike->category->name }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-5">
+                                        <div>
+                                            <span class="text-indigo-600 font-semibold">€{{ number_format($bike->daily_rate, 2) }}</span>
+                                            <span class="text-gray-500 text-sm">/ day</span>
+                                        </div>
+                                        <a href="{{ route('bikes.show', $bike->id) }}" class="text-sm bg-indigo-600 text-white py-1.5 px-4 rounded-md hover:bg-indigo-700 transition-colors">View</a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-16">
+                        <p class="text-gray-500">No bikes available at the moment. Please check back later.</p>
+                    </div>
+                @endif
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="py-16 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-gray-900 text-center mb-12">How It Works</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    <div class="text-center">
+                        <div class="bg-indigo-100 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">1. Find a Bike</h3>
+                        <p class="text-gray-500">Browse our selection of bikes and choose the one that fits your needs.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-indigo-100 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">2. Book Your Rental</h3>
+                        <p class="text-gray-500">Select your dates and request the bike. Owner will confirm your booking.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-indigo-100 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+
                         <h3 class="text-xl font-semibold text-gray-900 mb-3">3. Enjoy Your Ride</h3>
                         <p class="text-gray-500">Pick up the bike, explore, and drop it off at the end of your rental period.</p>
                     </div>
                 </div>
             </div>
         </section>
+
 
         <!-- CTA Section avec animation -->
         <section class="py-16 bg-gradient-to-r from-indigo-600 to-blue-600 relative overflow-hidden">
@@ -354,11 +566,27 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
+
+        <!-- CTA Section -->
+        <section class="py-16 bg-indigo-600">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-extrabold text-white mb-5">Ready to start riding?</h2>
+                <p class="text-xl text-indigo-100 mb-8">Join Vélocité today and discover the freedom of cycling.</p>
+                <div class="inline-flex rounded-md shadow">
+                    @guest
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 transition-colors">
+                            Sign Up Now
+                        </a>
+                    @else
+                        <a href="{{ route('search.index') }}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 transition-colors">
+                            Find a Bike
+
                         </a>
                     @endguest
                 </div>
             </div>
         </section>
+
 
 <!-- Footer -->
 <footer class="bg-gray-900 text-white py-12">
@@ -461,3 +689,23 @@
 
 </body>
 </html>
+
+        <!-- Footer -->
+        <footer class="bg-white py-8 border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <p class="text-gray-500">&copy; {{ date('Y') }} Vélocité. All rights reserved.</p>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-500 hover:text-indigo-600 transition-colors">About</a>
+                        <a href="#" class="text-gray-500 hover:text-indigo-600 transition-colors">Privacy</a>
+                        <a href="#" class="text-gray-500 hover:text-indigo-600 transition-colors">Terms</a>
+                        <a href="#" class="text-gray-500 hover:text-indigo-600 transition-colors">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>
+

@@ -61,6 +61,95 @@
                     <section>
                         <header>
                             <h2 class="text-lg font-medium text-gray-900">
+                                {{ __('CIN Information') }}
+                            </h2>
+
+                            <p class="mt-1 text-sm text-gray-600">
+                                {{ __("Your CIN details and images. You can update the images but not the CIN number.") }}
+                            </p>
+                        </header>
+
+                        <!-- CIN Number Display -->
+                        <div class="mt-6">
+                            <x-input-label for="cin" :value="__('CIN Number')" />
+                            <x-text-input id="cin" name="cin" type="text" class="mt-1 block w-full bg-gray-100" 
+                                value="{{ $user->cin }}" disabled readonly />
+                            <p class="mt-1 text-xs text-gray-500">CIN number cannot be changed.</p>
+                        </div>
+
+                        <!-- CIN Images -->
+                        <div class="mt-6">
+                            <form method="post" action="{{ route('profile.cin.update') }}" enctype="multipart/form-data">
+                                @csrf
+                                
+                                <!-- Front CIN Image -->
+                                <div class="mb-6">
+                                    <x-input-label :value="__('CIN Front Image')" />
+                                    <div class="mt-2 mb-4">
+                                        @if($user->cin_front)
+                                            <img src="{{ $user->getCinFrontUrlAttribute() }}" 
+                                                alt="CIN Front" 
+                                                class="max-h-48 border border-gray-200 rounded">
+                                        @else
+                                            <div class="p-4 bg-gray-100 text-gray-500 text-center rounded">
+                                                No image available
+                                            </div>
+                                        @endif
+                                    </div>
+                                    
+                                    <x-input-label for="cin_front" :value="__('Update CIN Front')" />
+                                    <input id="cin_front" name="cin_front" type="file"
+                                        class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                        accept="image/jpeg,image/png,image/jpg">
+                                    <x-input-error class="mt-2" :messages="$errors->get('cin_front')" />
+                                </div>
+                                
+                                <!-- Back CIN Image -->
+                                <div class="mb-6">
+                                    <x-input-label :value="__('CIN Back Image')" />
+                                    <div class="mt-2 mb-4">
+                                        @if($user->cin_back)
+                                            <img src="{{ $user->getCinBackUrlAttribute() }}" 
+                                                alt="CIN Back" 
+                                                class="max-h-48 border border-gray-200 rounded">
+                                        @else
+                                            <div class="p-4 bg-gray-100 text-gray-500 text-center rounded">
+                                                No image available
+                                            </div>
+                                        @endif
+                                    </div>
+                                    
+                                    <x-input-label for="cin_back" :value="__('Update CIN Back')" />
+                                    <input id="cin_back" name="cin_back" type="file"
+                                        class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                        accept="image/jpeg,image/png,image/jpg">
+                                    <x-input-error class="mt-2" :messages="$errors->get('cin_back')" />
+                                </div>
+                                
+                                <div class="flex items-center gap-4">
+                                    <x-primary-button>{{ __('Update CIN Images') }}</x-primary-button>
+
+                                    @if (session('status') === 'cin-images-updated')
+                                        <p
+                                            x-data="{ show: true }"
+                                            x-show="show"
+                                            x-transition
+                                            x-init="setTimeout(() => show = false, 2000)"
+                                            class="text-sm text-gray-600"
+                                        >{{ __('Images updated.') }}</p>
+                                    @endif
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div class="max-w-xl">
+                    <section>
+                        <header>
+                            <h2 class="text-lg font-medium text-gray-900">
                                 {{ __('Profile Information') }}
                             </h2>
 

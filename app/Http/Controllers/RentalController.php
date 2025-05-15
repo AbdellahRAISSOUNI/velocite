@@ -58,6 +58,16 @@ class RentalController extends Controller
             return redirect()->route('bikes.show', $bike->id)->with('error', 'This bike is not available for rent');
         }
 
+        // Check if user is trying to rent their own bike
+        if (Auth::id() === $bike->owner_id) {
+            return redirect()->route('bikes.show', $bike->id)->with('error', 'You cannot rent your own bike');
+        }
+
+        // Check if the user has appropriate role
+        if (!Auth::user()->hasAnyRole(['client', 'partner'])) {
+            return redirect()->route('bikes.show', $bike->id)->with('error', 'Your account type cannot rent bikes');
+        }
+
         // Get available date ranges for the next 60 days
         $availabilityService = app(BikeAvailabilityService::class);
         $ranges = $availabilityService->getAvailableDateRanges($bike);
@@ -78,7 +88,7 @@ class RentalController extends Controller
         return view('rentals.create', compact('bike', 'startDate', 'endDate', 'availableDates'));
     }
 
-    /**
+     /**
      * Store a newly created rental in storage.
      */
     public function store(Request $request)
@@ -97,6 +107,16 @@ class RentalController extends Controller
         // Check if the bike is available
         if (!$bike->is_available) {
             return back()->with('error', 'This bike is not available for rent');
+        }
+
+        // Check if user is trying to rent their own bike
+        if (Auth::id() === $bike->owner_id) {
+            return back()->with('error', 'You cannot rent your own bike');
+        }
+
+        // Check if the user has appropriate role
+        if (!Auth::user()->hasAnyRole(['client', 'partner'])) {
+            return back()->with('error', 'Your account type cannot rent bikes');
         }
 
         // Check if there are any conflicting rentals
