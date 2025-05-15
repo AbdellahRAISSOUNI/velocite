@@ -126,7 +126,19 @@
                                 </div>
 
                                 <div class="col-span-1">
-                                    <label for="pickup_notes" class="block text-sm font-medium text-gray-700">Pickup Notes (Optional)</label>
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="delivery_required" name="delivery_required" type="checkbox" value="1" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="delivery_required" class="font-medium text-gray-700">I need delivery service</label>
+                                            <p class="text-gray-500">Check this box if you would like the bike to be delivered to your location (additional fees may apply)</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-span-1">
+                                    <label for="pickup_notes" class="block text-sm font-medium text-gray-700">Pickup/Delivery Notes (Optional)</label>
                                     <textarea id="pickup_notes" name="pickup_notes" rows="3" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('pickup_notes') }}</textarea>
                                     @error('pickup_notes')
                                         <p class="mt-1 text-red-500 text-xs">{{ $message }}</p>
